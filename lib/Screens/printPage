@@ -1,0 +1,59 @@
+import 'package:bluetooth_print/bluetooth_print.dart';
+import 'package:bluetooth_print/bluetooth_print_model.dart';
+import 'package:intl/intl.dart';
+import 'package:flutter/material.dart';
+
+class PrintPage extends StatefulWidget {
+  PrintPageState createState() => PrintPageState();
+}
+
+class PrintPageState extends State<PrintPage> {
+  BluetoothPrint bluetoothPrint = BluetoothPrint.instance;
+  List<BluetoothDevice> _devices = [];
+  String _devicesMsg = "";
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) => {initPrinter()});
+  }
+
+  Future<void> initPrinter() async {
+    bluetoothPrint.startScan(timeout: Duration(seconds: 10));
+
+    if (!mounted) return;
+    bluetoothPrint.scanResults.listen((val) {
+      if (!mounted) return;
+      setState(() => {_devices = val});
+
+      if (_devices.isEmpty)
+        setState(() {
+          _devicesMsg = "No Devices";
+        });
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text("Bluetooth Devices"),
+        centerTitle: true,
+      ),
+      body: _devices.isEmpty
+          ? Center(
+              child: Text(_devicesMsg),
+            )
+          : ListView.builder(
+              itemCount: _devices.length,
+              itemBuilder: (c, i) {
+                return ListTile(
+                  leading: Icon(Icons.print),
+                  title: Text(_devices[i].name ?? 'No devices found'),
+                  subtitle: Text(_devices[i].address ?? 'No address found'),
+                  onTap: () {},
+                );
+              }),
+    );
+  }
+}
