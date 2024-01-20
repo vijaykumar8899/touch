@@ -1,0 +1,106 @@
+Container(
+              height: 200,
+              width: 500,
+              child: Card(
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: const BorderSide(width: 2.0, color: Colors.white),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(20.0),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(weight.toStringAsFixed(3)),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          // const Text('weight'),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(percentage.toStringAsFixed(2)),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          // const Text('%'),
+                          const SizedBox(
+                            height: 5,
+                          ),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(less.toStringAsFixed(3)),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          // const Text('Less'),
+                        ],
+                      ),
+                      const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text("_________"),
+                          SizedBox(
+                            width: 5,
+                          ),
+                          // const Text('Less'),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(perResult.toStringAsFixed(2)),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          // const Text('Less'),
+                        ],
+                      ),
+                      Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(perResult.toStringAsFixed(2)),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                          // const Text('Less'),
+                        ],
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Text(
+                            result.toStringAsFixed(3),
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 18.0,
+                              color: Colors.black,
+                            ),
+                          ),
+                          const SizedBox(
+                            width: 5,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),

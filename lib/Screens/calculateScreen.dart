@@ -1,210 +1,690 @@
-import 'package:flutter/material.dart';
-// import 'package:touch/Screens/PrintPage.dart';
-import 'dart:ui';
+import 'dart:io';
 
-class calculate extends StatefulWidget {
+import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:intl/intl.dart';
+import 'package:touch/HelperFunctions/Toast.dart';
+import 'package:google_fonts/google_fonts.dart';
+
+class calculateScreen extends StatefulWidget {
   @override
-  calculateState createState() => calculateState();
+  State<calculateScreen> createState() => _calculateScreenState();
 }
 
-class calculateState extends State<calculate> {
-  @override
-  TextEditingController WeightConrl_ = TextEditingController();
+class _calculateScreenState extends State<calculateScreen> {
+  TextEditingController weightConrl_ = TextEditingController();
   TextEditingController perConrl_ = TextEditingController();
-  TextEditingController Less_ = TextEditingController();
-  double UserName = 0;
-  var _user = '';
+  TextEditingController lessConrl_ = TextEditingController();
+  TextEditingController textFieldController = TextEditingController();
 
-  Widget build(BuildContext context) => Container(
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-              image: AssetImage("Images/1touch.jpg"), fit: BoxFit.cover),
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.center,
-              end: Alignment.bottomCenter,
-              colors: [
-                Colors.black12,
-                Colors.red,
-              ],
+  double result = 0;
+  double weight = 0.0;
+  double less = 0.0;
+  double percentage = 0.0;
+  String weight_temp = '';
+  String imagePath = '';
+  String mainFolder = 'touchCollection';
+  String imageUrl = '';
+  bool isImageUploaded = false;
+  String formattedDate = '';
+  double totalWeight = 0.0;
+  int totalCount = 0;
+  double perResult = 0.0;
+
+  Future<void> timeAndDate() async {
+    String currentDate = DateTime.now()
+        .toString()
+        .split(' ')[0]; // Get today's date in format 'yyyy-mm-dd'
+
+    List<String> parts = currentDate.split('-');
+    formattedDate =
+        '${parts[2]}-${parts[1]}-${parts[0]}'; // Reversing the date format to 'dd-mm-yyyy'
+
+    ToastMessage.toast_(
+        formattedDate); // This will output the date in 'dd-mm-yyyy' format
+  }
+
+  Future<void> getTotalWeightAndCount() async {
+    FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+    try {
+      DocumentSnapshot<Map<String, dynamic>> docSnapshot = await firestore
+          .collection(mainFolder)
+          .doc('vijay')
+          .collection('allRecordCalculation')
+          .doc(formattedDate)
+          .get();
+
+      if (docSnapshot.exists) {
+        // Access the totalWeight and totalCount fields from the document
+        print(' data from fire : ${docSnapshot.data().toString()}');
+        print(
+            ' data from str : ${docSnapshot.data()?['totalWeight'].toString()}');
+
+        String totalWeight_ = docSnapshot.data()!['totalWeight'];
+        String totalCount_ = docSnapshot.data()!['totalCount'];
+        ToastMessage.toast_('2');
+
+        totalWeight = double.tryParse(totalWeight_) ?? 0.0;
+        totalCount = int.tryParse(totalCount_) ?? 0;
+
+        // double totalWeight =
+        //     (docSnapshot.data()?['totalWeight'] as double?) ?? 0.0;
+        // int totalCount = (docSnapshot.data()?['totalCount'] as int?) ?? 0;
+
+        // totalWeight = docSnapshot.get('totalWeight') as double? ?? 0.0;
+        // totalCount = docSnapshot.get('totalCount') as int? ?? 0;
+        print('totalCount in fire : $totalCount');
+        ToastMessage.toast_(
+            'weight : ${totalWeight.toStringAsFixed(3)} count : $totalCount');
+
+        // return [totalWeight.toString(), totalCount.toString()];
+      } else {
+        await firestore
+            .collection(mainFolder)
+            .doc('vijay')
+            .collection('allRecordCalculation')
+            .doc(formattedDate)
+            .set({
+          'totalWeight': '0.0',
+          'totalCount': '0',
+        }).then((value) => ToastMessage.toast_('set was successfull'));
+
+        // return ['0.0', '0'];
+      }
+    } catch (e) {
+      print('Error in the first method : $e');
+      return null;
+    }
+  }
+
+  void saveData() async {
+    try {
+      FirebaseFirestore firebase = FirebaseFirestore.instance;
+      ToastMessage.toast_(isImageUploaded.toString());
+      if (isImageUploaded) {
+        ToastMessage.toast_('inside imageUPload');
+        FirebaseStorage storage = FirebaseStorage.instance;
+
+        final storageRef = storage.ref().child(mainFolder);
+
+        final uploadTask = storageRef.putFile(File(imagePath));
+        var snapshot = await uploadTask
+            .whenComplete(() => ToastMessage.toast_('Uploaded image'));
+
+        imageUrl = await snapshot.ref.getDownloadURL();
+      }
+
+      await getTotalWeightAndCount();
+      print('totalCount in saveFire : $totalCount');
+
+      // int count = int.parse(data![1]); // totalCount
+      // double totalWeight = double.parse(data[0]); // totalWeight
+      totalCount += 1;
+      print('totalCount in saveFire2 : $totalCount');
+
+      totalWeight += result;
+      ToastMessage.toast_('weight : $totalWeight , count: $totalCount');
+
+      await firebase
+          .collection(mainFolder)
+          .doc('vijay')
+          .collection(formattedDate)
+          .add({
+        'order': totalCount,
+        'weight': weight.toStringAsFixed(3),
+        'less': less.toStringAsFixed(3),
+        'percentage': percentage.toStringAsFixed(2),
+        'result': result.toStringAsFixed(3),
+        'name': textFieldController.text,
+        'image': imageUrl,
+        'timeStamp': Timestamp.now(),
+      }).then((value) => ToastMessage.toast_('sucesss'));
+
+      await firebase
+          .collection(mainFolder)
+          .doc('vijay')
+          .collection('allRecordCalculation')
+          .doc(formattedDate)
+          .set({
+        'totalWeight': totalWeight.toStringAsFixed(3),
+        'totalCount': totalCount.toString(),
+      }).then((value) => ToastMessage.toast_('set was successfull'));
+
+      setState(() {
+        totalWeight = 0.0;
+        isImageUploaded = false;
+        imagePath = '';
+      });
+    } catch (e) {
+      ToastMessage.toast_('error : ${e.toString()}');
+    }
+  }
+
+  lessControllerInitialize() {
+    weight = double.tryParse(weightConrl_.text) ?? 0.00;
+
+    lessConrl_.text = weight >= 5.0 ? '00.20' : '00.25';
+  }
+
+  Future<void> showInputDialog(BuildContext context) async {
+    File? selectedImage;
+
+    await showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: const Color.fromARGB(255, 178, 212, 240),
+          title: Text(
+            'Enter Text and Photo',
+            style: GoogleFonts.italiana(
+              // Use your desired Google Font, e.g., 'lobster'
+              textStyle: const TextStyle(
+                color: Colors.black,
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
-          child: Scaffold(
-            backgroundColor: Colors.transparent,
-            appBar: AppBar(
-              title: const Text(
-                "MAHADEV GOLD CHECK",
-                style: TextStyle(
-                  fontStyle: FontStyle.italic,
-                  fontWeight: FontWeight.bold,
-                  fontSize: 24.0,
-                  color: Color.fromARGB(255, 0, 0, 0),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              TextField(
+                decoration: InputDecoration(
+                  hintText: "Name of the Customer",
+                  contentPadding:
+                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                  hintStyle: const TextStyle(
+                    color: Colors.black87,
+                    fontStyle: FontStyle.italic,
+                  ),
+                  filled: true,
+                  fillColor:
+                      Colors.white.withOpacity(0.5), // Transparent with white
+                  enabledBorder: OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.white70, width: 2.0),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderSide:
+                        const BorderSide(color: Colors.white70, width: 2.0),
+                    borderRadius: BorderRadius.circular(40),
+                  ),
                 ),
+                keyboardType: TextInputType.name,
+                controller: textFieldController,
               ),
-              backgroundColor: Color.fromARGB(255, 253, 3, 3),
-              centerTitle: true,
-            ),
-            body: Container(
-              alignment: Alignment.center,
-              padding: const EdgeInsets.all(32),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
+              const SizedBox(height: 16),
+              Row(
                 children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Enter the Weight",
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                      hintStyle: TextStyle(
-                        color: Colors.black87,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white70,
-                      enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white70, width: 2.0),
-                          borderRadius: BorderRadius.circular(10)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white70, width: 2.0),
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    keyboardType: TextInputType.number,
-                    controller: WeightConrl_,
-                  ),
-                  SizedBox(height: 10),
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Enter percentage",
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                      hintStyle: TextStyle(
-                        color: Colors.black87,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white70,
-                      enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white70, width: 2.0),
-                          borderRadius: BorderRadius.circular(10)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white70, width: 2.0),
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    keyboardType: TextInputType.number,
-                    controller: perConrl_,
-                  ),
-                  SizedBox(
-                    height: 10,
-                  ),
-                  //taking input how much to subtract
-                  TextField(
-                    decoration: InputDecoration(
-                      hintText: "Enter Less",
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                      hintStyle: TextStyle(
-                        color: Colors.black87,
-                        fontStyle: FontStyle.italic,
-                      ),
-                      filled: true,
-                      fillColor: Colors.white70,
-                      enabledBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white70, width: 2.0),
-                          borderRadius: BorderRadius.circular(10)),
-                      focusedBorder: OutlineInputBorder(
-                          borderSide:
-                              BorderSide(color: Colors.white70, width: 2.0),
-                          borderRadius: BorderRadius.circular(10)),
-                    ),
-                    keyboardType: TextInputType.number,
-                    controller: Less_,
-                  ),
-                  //end
-                  SizedBox(
-                    height: 20,
-                  ),
-                  TextButtonTheme(
-                    data: TextButtonThemeData(
-                      style: ButtonStyle(
-                        foregroundColor:
-                            MaterialStateProperty.all<Color>(Colors.white),
-                        backgroundColor:
-                            MaterialStateProperty.all<Color>(Colors.red),
-                        padding: MaterialStateProperty.all<EdgeInsets>(
-                          EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                        ),
-                        shape:
-                            MaterialStateProperty.all<RoundedRectangleBorder>(
-                          RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(4.0),
-                          ),
-                        ),
-                      ),
-                    ),
-                    child: TextButton(
-                      onPressed: () {
+                  ElevatedButton(
+                    onPressed: () async {
+                      final picker = ImagePicker();
+                      final pickedImage = await picker.pickImage(
+                        source: ImageSource.camera,
+                      );
+                      if (pickedImage != null) {
                         setState(() {
-                          double weight =
-                              double.tryParse(WeightConrl_.text) ?? 0.00;
-                          double percentage =
-                              double.tryParse(perConrl_.text) ?? 0.00;
-                          double Less = double.tryParse(Less_.text) ?? 0.00;
-                          double result =
-                              weight * (percentage - (Less / 100)) / 100;
-                          UserName = result;
-                          // Navigator.push(
-                          //   context,
-                          //   MaterialPageRoute(
-                          //     builder: (context) => SearchBarScreen(
-                          //     //  weight_: weight,
-                          //     //  percentage_: percentage,
-                          //     //  result: result,
-                          //     ),
-                          //   ),
-                          // );
-
-                          WeightConrl_.clear();
-                          perConrl_.clear();
-                          Less_.clear();
+                          selectedImage = File(pickedImage.path);
+                          imagePath = pickedImage.path;
+                          isImageUploaded = true;
                         });
-                      },
-                      child: Text('Calculate'),
-                    ),
+                      } else {}
+                    },
+                    child: const Text('Take Photo'),
                   ),
-                  //pasinting
-                  SizedBox(height: 10),
-                  Card(
-                    elevation: 4.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: BorderSide(width: 2.0, color: Colors.white),
-                    ),
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Text(
-                        UserName.toStringAsFixed(3),
-                        style: TextStyle(
-                          fontWeight: FontWeight.bold,
-                          fontSize: 18.0,
-                          color: Colors.black,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  //
+                  const SizedBox(width: 16),
+                  isImageUploaded
+                      ? selectedImage != null
+                          ? SizedBox(
+                              width: 100,
+                              height: 100,
+                              child: Image.file(selectedImage!),
+                            )
+                          : const SizedBox(
+                              width: 100,
+                              height: 100,
+                              child: Text('reTake'),
+                            )
+                      : const SizedBox(),
                 ],
               ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                saveData();
+                Navigator.pop(context);
+              },
+              child: const Text('Submit'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    timeAndDate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          'MAHADEV GOLD CHECK',
+          style: GoogleFonts.italiana(
+            // Use your desired Google Font, e.g., 'lobster'
+            textStyle: const TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
             ),
           ),
         ),
-      );
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+            stops: [0.3, 1.0], // Adjust the stops as needed
+          ),
+        ),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Weight",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor:
+                    Colors.white.withOpacity(0.5), // Transparent with white
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              controller: weightConrl_,
+              onChanged: (_) {
+                lessControllerInitialize();
+              },
+            ),
+
+            const SizedBox(height: 10),
+
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Percentage",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor: const Color.fromARGB(
+                    100, 178, 212, 240), // Light blue color
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              controller: perConrl_,
+            ),
+
+            const SizedBox(
+              height: 10,
+            ),
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Less",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor: Colors.pink[100], // Pink color
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              controller: lessConrl_,
+            ),
+
+            //end
+
+            //start
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                TextButtonTheme(
+                  data: TextButtonThemeData(
+                    style: ButtonStyle(
+                      foregroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 2, 69, 124)),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        // weight = double.tryParse(weightConrl_.text) ?? 0.00;
+                        percentage = double.tryParse(perConrl_.text) ?? 0.00;
+                        less = double.tryParse(lessConrl_.text) ?? 0.00;
+                        if (less > 1) {
+                          less = less / 100;
+                        }
+                        perResult = percentage - (less);
+                        result = weight * (perResult) / 100;
+                        // Navigator.push(
+                        //   context,
+                        //   MaterialPageRoute(
+                        //     builder: (context) => SearchBarScreen(
+                        //     //  weight_: weight,
+                        //     //  percentage_: percentage,
+                        //     //  result: result,
+                        //     ),
+                        //   ),
+                        // );
+
+                        weightConrl_.clear();
+                        perConrl_.clear();
+                        lessConrl_.clear();
+                      });
+                    },
+                    child: const Text('Print'),
+                  ),
+                ),
+
+                const SizedBox(
+                  width: 10,
+                ),
+                //backup button
+
+                TextButtonTheme(
+                  data: TextButtonThemeData(
+                    style: ButtonStyle(
+                      foregroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 2, 69, 124)),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      //backupbutton
+                      showInputDialog(context);
+                    },
+                    child: const Text('Backup'),
+                  ),
+                ),
+              ],
+            ),
+            //pasinting
+            const SizedBox(height: 10),
+
+            //card start
+            Container(
+              height: 270,
+              width: 500,
+              child: Card(
+                elevation: 4.0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10.0),
+                  side: const BorderSide(width: 2.0, color: Colors.white),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          TextBoxBold(
+                            text: 'Date   :',
+                          ),
+                          SpaceBox(
+                            size: 10,
+                          ),
+                          TextBoxNormal(
+                            text: formattedDate,
+                          ),
+                          SpaceBox(
+                            size: 10,
+                          ),
+                          TextBoxNormal(
+                              text:
+                                  "${DateFormat('h:mm a').format(DateTime.now())}."),
+                        ],
+                      ),
+                      Row(
+                        // mainAxisAlignment: MainAxisAlignment.center,
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          TextBoxBold(text: 'Name  :  '),
+                          TextBoxNormal(text: "Name"),
+                        ],
+                      ),
+                      Row(
+                        // mainAxisAlignment: MainAxisAlignment.center,
+                        // crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          TextBoxBold(text: "Sno    : "),
+                          TextBoxNormal(text: "Sno"),
+                        ],
+                      ),
+                      SpaceBoxHeight(size: 10),
+                      Row(
+                        children: [
+                          ColumnBox(
+                            weight: weight,
+                            text: "Kacha.Wt",
+                            num: 3,
+                          ),
+                          SpaceBox(size: 07),
+                          ColumnBox(
+                            weight: percentage,
+                            text: "Touch%",
+                            num: 2,
+                          ),
+                          SpaceBox(size: 01),
+                          ColumnBox(
+                            weight: less,
+                            text: "Less.",
+                            num: 2,
+                          ),
+                          SpaceBox(size: 01),
+                          ColumnBox(
+                            weight: result,
+                            text: "Fine.Wt",
+                            num: 3,
+                          ),
+                          SpaceBox(size: 01),
+                        ],
+                      ),
+                      SpaceBoxHeight(size: 20),
+                      Row(
+                        children: [
+                          TextBoxBold(text: "KACHA Wt :"),
+                          SpaceBox(size: 20),
+                          TextBoxNormal(text: weight.toStringAsFixed(3)),
+                        ],
+                      ),
+                      Row(
+                        children: [
+                          TextBoxBold(text: "Fine Wt :  "),
+                          SpaceBox(size: 20),
+                          TextBoxNormal(text: result.toStringAsFixed(3)),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            //card end
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class ColumnBox extends StatelessWidget {
+  String text; // Use camelCase for variable names
+  int num;
+  double weight;
+  ColumnBox({required this.text, required this.num, required this.weight});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      // mainAxisAlignment: MainAxisAlignment.center,
+      // crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        TextBoxBold(text: text),
+        const Text("___________"),
+        TextBoxNormal(text: weight.toStringAsFixed(num)),
+      ],
+    );
+  }
+}
+
+class TextBoxBold extends StatelessWidget {
+  String text; // Use camelCase for variable names
+
+  TextBoxBold({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text, // Use the 'text' parameter here
+      style: const TextStyle(
+        fontWeight: FontWeight.bold,
+        fontSize: 18.0,
+        color: Colors.black,
+      ),
+    );
+  }
+}
+
+class TextBoxNormal extends StatelessWidget {
+  String text; // Use camelCase for variable names
+
+  TextBoxNormal({required this.text});
+
+  @override
+  Widget build(BuildContext context) {
+    return Text(
+      text, // Use the 'text' parameter here
+      style: const TextStyle(
+        fontWeight: FontWeight.normal,
+        fontSize: 18.0,
+        color: Colors.black,
+      ),
+    );
+  }
+}
+
+class SpaceBox extends StatelessWidget {
+  double size;
+
+  SpaceBox({super.key, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      width: size,
+    );
+  }
+}
+
+class SpaceBoxHeight extends StatelessWidget {
+  double size;
+
+  SpaceBoxHeight({super.key, required this.size});
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: size,
+    );
+  }
 }
