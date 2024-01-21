@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:touch/Screens/calculateScreen.dart';
+import 'package:touch/Screens/CalculateScreen.dart';
 
 class RecordsScreen extends StatefulWidget {
   @override

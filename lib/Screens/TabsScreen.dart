@@ -3,7 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:touch/Screens/RecordsScreen.dart';
-import 'package:touch/Screens/calculateScreen.dart';
+import 'package:touch/Screens/CalculateScreen.dart';
  
 class TabsScreen extends StatefulWidget {
   @override
