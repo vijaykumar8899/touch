@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
+import 'package:touch/Screens/RegisterScreens/RegisterScreen.dart';
 import 'package:touch/Screens/TabsScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -14,10 +15,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class LoginScreenState extends State<LoginScreen> {
-  TextEditingController nameController_ = TextEditingController();
   TextEditingController _phoneNumberCtrl = TextEditingController();
-
-  TextEditingController cityController_ = TextEditingController();
   TextEditingController otpController_ = TextEditingController();
 
   bool showOTPField = false; // Initially hide OTP field
@@ -236,30 +234,17 @@ class LoginScreenState extends State<LoginScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            tempClass(
+            InputClass(
               exText: "Ex: 9123456789",
               text: 'Number',
               name_: TextInputType.number,
               controller_: _phoneNumberCtrl,
             ),
-            tempClass(
+            InputClass(
               exText: "Ex: 123456",
               text: 'OTP',
               name_: TextInputType.number,
               controller_: otpController_,
-            ),
-            // if()...[],
-            tempClass(
-              exText: "Ex: Testing Center",
-              text: 'Name',
-              name_: TextInputType.name,
-              controller_: nameController_,
-            ),
-            tempClass(
-              exText: "Ex: Jaggayyapeta",
-              text: 'City',
-              name_: TextInputType.name,
-              controller_: cityController_,
             ),
             Center(
               child: TextButtonTheme(
@@ -282,7 +267,7 @@ class LoginScreenState extends State<LoginScreen> {
                 ),
                 child: TextButton(
                   onPressed: () {
-                    Get.to(TabsScreen());
+                    Get.to(RegisterScreen());
                     // ToastMessage.toast_(nameController_.text);
                   },
                   child: const Text('Login/ Signup'),
@@ -296,13 +281,13 @@ class LoginScreenState extends State<LoginScreen> {
   }
 }
 
-class tempClass extends StatelessWidget {
+class InputClass extends StatelessWidget {
   String text;
   TextInputType name_;
   String exText;
   TextEditingController controller_;
 
-  tempClass(
+  InputClass(
       {required this.text,
       required this.name_,
       required this.exText,

@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:touch/Screens/calculateScreen.dart';
 
 class RecordsScreen extends StatefulWidget {
   @override
@@ -101,8 +102,8 @@ class _RecordsScreenState extends State<RecordsScreen> {
                       ),
                       if (isArrowPressedList[index])
                         SizedBox(
-                          height: 500, // Set the height
-                          width: double.infinity,
+                          height: 700, // Set the height
+                          width: 350,
                           child: DisplayDataFromFirebase(
                               collectionPath: documentID),
                         ), // Show when arrow is pressed
@@ -221,7 +222,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
               ),
               child: Expanded(
                 child: PhotoView(
-                  imageProvider: CachedNetworkImageProvider(imageUrl), 
+                  imageProvider: CachedNetworkImageProvider(imageUrl),
                   backgroundDecoration: const BoxDecoration(
                     color: Colors.transparent,
                   ),
@@ -237,6 +238,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
 
     return Scaffold(
       body: Container(
+        width: 300,
         decoration: const BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
@@ -273,49 +275,167 @@ class DisplayDataFromFirebase extends StatelessWidget {
                     DateFormat('d MMMM y').add_jms().format(dateTime);
                 String url = doc['image'];
 
-                // Access fields from the document and display them in ListTile
-                return ListTile(
-                  title: Row(
-                    children: [
-                      Text(
-                        '${doc['order']}',
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(
-                        width: 15,
-                      ),
-                      Column(
+                // // Access fields from the document and display them in ListTile
+                // return ListTile(
+                //   title: Row(
+                //     children: [
+                //       Text(
+                //         '${doc['order']}',
+                //         style: const TextStyle(fontWeight: FontWeight.bold),
+                //       ),
+                //       const SizedBox(
+                //         width: 15,
+                //       ),
+                //       Column(
+                //         crossAxisAlignment: CrossAxisAlignment.start,
+                //         children: [
+                //           Text('Name: ${doc['name']}'),
+                //           Text('Weight: ${doc['weight']}'),
+                //           Text('Percentage: ${doc['percentage']}'),
+                //           Text('Less: ${doc['less']}'),
+                //           Text('Result: ${doc['result']}'),
+                //           Text(formattedDateTime),
+                //         ],
+                //       ),
+                //       const SizedBox(
+                //         width: 20,
+                //       ),
+                //       if (doc['image'].toString().isNotEmpty)
+                //         GestureDetector(
+                //           onTap: () {
+                //             _showImagePopup(context, url);
+                //           },
+                //           child: SizedBox(
+                //             height: 50,
+                //             width: 50,
+                //             child: Image.network(
+                //               doc['image'],
+                //               fit: BoxFit.cover,
+                //             ),
+                //           ),
+                //         ),
+                //     ],
+                //   ),
+                //   subtitle: const SizedBox(
+                //     height: 20,
+                //   ),
+                // );
+                return Container(
+                  height: 270,
+                  width: 300,
+                  child: Card(
+                    elevation: 4.0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10.0),
+                      side: const BorderSide(width: 2.0, color: Colors.white),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text('Name: ${doc['name']}'),
-                          Text('Weight: ${doc['weight']}'),
-                          Text('Percentage: ${doc['percentage']}'),
-                          Text('Less: ${doc['less']}'),
-                          Text('Result: ${doc['result']}'),
-                          Text(formattedDateTime),
+                          Row(
+                            children: [
+                              TextBoxBold(
+                                text: 'Date   :',
+                              ),
+                              SpaceBox(
+                                size: 10,
+                              ),
+                              TextBoxNormal(
+                                text: formattedDateTime,
+                              ),
+                            ],
+                          ),
+                          Row(
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            // crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              TextBoxBold(text: 'Name  :  '),
+                              TextBoxNormal(text: doc['name']),
+                            ],
+                          ),
+                          Row(
+                            // mainAxisAlignment: MainAxisAlignment.center,
+                            // crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              TextBoxBold(text: "Sno    : "),
+                              TextBoxNormal(
+                                text: '${doc['order']}',
+                              ),
+                            ],
+                          ),
+                          SpaceBoxHeight(size: 10),
+                          Row(
+                            children: [
+                              ColumnBox(
+                                weight: double.tryParse(doc['weight']) ?? 0.0,
+                                text: 'Kacha.Wt',
+                                num: 3,
+                              ),
+                              SpaceBox(size: 07),
+                              ColumnBox(
+                                weight:
+                                    double.tryParse(doc['percentage']) ?? 0.0,
+                                text: "Touch%",
+                                num: 2,
+                              ),
+                              SpaceBox(size: 01),
+                              ColumnBox(
+                                weight: double.tryParse(doc['less']) ?? 0.0,
+                                text: "Less.",
+                                num: 2,
+                              ),
+                              SpaceBox(size: 01),
+                              ColumnBox(
+                                weight: double.tryParse(doc['result']) ?? 0.0,
+                                text: "Fine.Wt",
+                                num: 3,
+                              ),
+                              SpaceBox(size: 01),
+                            ],
+                          ),
+                          SpaceBoxHeight(size: 20),
+                          Row(
+                            children: [
+                              Column(
+                                children: [
+                                  Row(
+                                    children: [
+                                      TextBoxBold(text: "KACHA Wt :"),
+                                      SpaceBox(size: 20),
+                                      TextBoxNormal(text: doc['weight']),
+                                    ],
+                                  ),
+                                  Row(
+                                    children: [
+                                      TextBoxBold(text: "Fine Wt :  "),
+                                      SpaceBox(size: 20),
+                                      TextBoxNormal(text: doc['result']),
+                                    ],
+                                  ),
+                                ],
+                              ),
+                              SpaceBox(size: 30),
+                              if (doc['image'].toString().isNotEmpty)
+                                GestureDetector(
+                                  onTap: () {
+                                    _showImagePopup(context, url);
+                                  },
+                                  child: SizedBox(
+                                    height: 50,
+                                    width: 50,
+                                    child: Image.network(
+                                      doc['image'],
+                                      fit: BoxFit.cover,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                         ],
                       ),
-                      const SizedBox(
-                        width: 20,
-                      ),
-                      if (doc['image'].toString().isNotEmpty)
-                        GestureDetector(
-                          onTap: () {
-                            _showImagePopup(context, url);
-                          },
-                          child: SizedBox(
-                            height: 50,
-                            width: 50,
-                            child: Image.network(
-                              doc['image'],
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                  subtitle: const SizedBox(
-                    height: 20,
+                    ),
                   ),
                 );
               },

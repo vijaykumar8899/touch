@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "1022497136271",
+    "project_id": "touch-c3fb2",
+    "storage_bucket": "touch-c3fb2.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1022497136271:android:c128102bc9c0517715dafa",
+        "android_client_info": {
+          "package_name": "com.example.touch"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDnLfrHHXzKyIBM_MPwnhdBVVGOyM1XQPI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

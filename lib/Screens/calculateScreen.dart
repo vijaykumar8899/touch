@@ -1,12 +1,14 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:touch/Screens/ProfileScreen.dart';
 
 class calculateScreen extends StatefulWidget {
   @override
@@ -17,7 +19,7 @@ class _calculateScreenState extends State<calculateScreen> {
   TextEditingController weightConrl_ = TextEditingController();
   TextEditingController perConrl_ = TextEditingController();
   TextEditingController lessConrl_ = TextEditingController();
-  TextEditingController textFieldController = TextEditingController();
+  TextEditingController customerNameConrl_ = TextEditingController();
 
   double result = 0;
   double weight = 0.0;
@@ -42,8 +44,8 @@ class _calculateScreenState extends State<calculateScreen> {
     formattedDate =
         '${parts[2]}-${parts[1]}-${parts[0]}'; // Reversing the date format to 'dd-mm-yyyy'
 
-    ToastMessage.toast_(
-        formattedDate); // This will output the date in 'dd-mm-yyyy' format
+    // ToastMessage.toast_(
+    //     formattedDate); // This will output the date in 'dd-mm-yyyy' format
   }
 
   Future<void> getTotalWeightAndCount() async {
@@ -135,10 +137,10 @@ class _calculateScreenState extends State<calculateScreen> {
           .add({
         'order': totalCount,
         'weight': weight.toStringAsFixed(3),
-        'less': less.toStringAsFixed(3),
+        'less': less.toStringAsFixed(2),
         'percentage': percentage.toStringAsFixed(2),
         'result': result.toStringAsFixed(3),
-        'name': textFieldController.text,
+        'name': customerNameConrl_.text,
         'image': imageUrl,
         'timeStamp': Timestamp.now(),
       }).then((value) => ToastMessage.toast_('sucesss'));
@@ -169,339 +171,32 @@ class _calculateScreenState extends State<calculateScreen> {
     lessConrl_.text = weight >= 5.0 ? '00.20' : '00.25';
   }
 
-  Future<void> showInputDialog(BuildContext context) async {
+  //card output alert start
+  Future<void> showOutputtDialog(BuildContext context) async {
     File? selectedImage;
-
     await showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          backgroundColor: const Color.fromARGB(255, 178, 212, 240),
-          title: Text(
-            'Enter Text and Photo',
-            style: GoogleFonts.italiana(
-              // Use your desired Google Font, e.g., 'lobster'
-              textStyle: const TextStyle(
-                color: Colors.black,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              TextField(
-                decoration: InputDecoration(
-                  hintText: "Name of the Customer",
-                  contentPadding:
-                      const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                  hintStyle: const TextStyle(
-                    color: Colors.black87,
-                    fontStyle: FontStyle.italic,
-                  ),
-                  filled: true,
-                  fillColor:
-                      Colors.white.withOpacity(0.5), // Transparent with white
-                  enabledBorder: OutlineInputBorder(
-                    borderSide:
-                        const BorderSide(color: Colors.white70, width: 2.0),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderSide:
-                        const BorderSide(color: Colors.white70, width: 2.0),
-                    borderRadius: BorderRadius.circular(40),
-                  ),
-                ),
-                keyboardType: TextInputType.name,
-                controller: textFieldController,
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  ElevatedButton(
-                    onPressed: () async {
-                      final picker = ImagePicker();
-                      final pickedImage = await picker.pickImage(
-                        source: ImageSource.camera,
-                      );
-                      if (pickedImage != null) {
-                        setState(() {
-                          selectedImage = File(pickedImage.path);
-                          imagePath = pickedImage.path;
-                          isImageUploaded = true;
-                        });
-                      } else {}
-                    },
-                    child: const Text('Take Photo'),
-                  ),
-                  const SizedBox(width: 16),
-                  isImageUploaded
-                      ? selectedImage != null
-                          ? SizedBox(
-                              width: 100,
-                              height: 100,
-                              child: Image.file(selectedImage!),
-                            )
-                          : const SizedBox(
-                              width: 100,
-                              height: 100,
-                              child: Text('reTake'),
-                            )
-                      : const SizedBox(),
-                ],
-              ),
-            ],
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Cancel'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                saveData();
-                Navigator.pop(context);
-              },
-              child: const Text('Submit'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    timeAndDate();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(
-          'MAHADEV GOLD CHECK',
-          style: GoogleFonts.italiana(
-            // Use your desired Google Font, e.g., 'lobster'
-            textStyle: const TextStyle(
-              color: Colors.black,
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
-            stops: [0.3, 1.0], // Adjust the stops as needed
-          ),
-        ),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Weight",
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                hintStyle: const TextStyle(
-                  color: Colors.black87,
-                  fontStyle: FontStyle.italic,
-                ),
-                filled: true,
-                fillColor:
-                    Colors.white.withOpacity(0.5), // Transparent with white
-                enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Colors.white70, width: 2.0),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Colors.white70, width: 2.0),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              controller: weightConrl_,
-              onChanged: (_) {
-                lessControllerInitialize();
-              },
-            ),
-
-            const SizedBox(height: 10),
-
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Percentage",
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                hintStyle: const TextStyle(
-                  color: Colors.black87,
-                  fontStyle: FontStyle.italic,
-                ),
-                filled: true,
-                fillColor: const Color.fromARGB(
-                    100, 178, 212, 240), // Light blue color
-                enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Colors.white70, width: 2.0),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Colors.white70, width: 2.0),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              controller: perConrl_,
-            ),
-
-            const SizedBox(
-              height: 10,
-            ),
-            TextField(
-              decoration: InputDecoration(
-                hintText: "Less",
-                contentPadding:
-                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-                hintStyle: const TextStyle(
-                  color: Colors.black87,
-                  fontStyle: FontStyle.italic,
-                ),
-                filled: true,
-                fillColor: Colors.pink[100], // Pink color
-                enabledBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Colors.white70, width: 2.0),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderSide:
-                      const BorderSide(color: Colors.white70, width: 2.0),
-                  borderRadius: BorderRadius.circular(40),
-                ),
-              ),
-              keyboardType: TextInputType.number,
-              controller: lessConrl_,
-            ),
-
-            //end
-
-            //start
-            const SizedBox(
-              height: 20,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                TextButtonTheme(
-                  data: TextButtonThemeData(
-                    style: ButtonStyle(
-                      foregroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 2, 69, 124)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        // weight = double.tryParse(weightConrl_.text) ?? 0.00;
-                        percentage = double.tryParse(perConrl_.text) ?? 0.00;
-                        less = double.tryParse(lessConrl_.text) ?? 0.00;
-                        if (less > 1) {
-                          less = less / 100;
-                        }
-                        perResult = percentage - (less);
-                        result = weight * (perResult) / 100;
-                        // Navigator.push(
-                        //   context,
-                        //   MaterialPageRoute(
-                        //     builder: (context) => SearchBarScreen(
-                        //     //  weight_: weight,
-                        //     //  percentage_: percentage,
-                        //     //  result: result,
-                        //     ),
-                        //   ),
-                        // );
-
-                        weightConrl_.clear();
-                        perConrl_.clear();
-                        lessConrl_.clear();
-                      });
-                    },
-                    child: const Text('Print'),
-                  ),
-                ),
-
-                const SizedBox(
-                  width: 10,
-                ),
-                //backup button
-
-                TextButtonTheme(
-                  data: TextButtonThemeData(
-                    style: ButtonStyle(
-                      foregroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 2, 69, 124)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      //backupbutton
-                      showInputDialog(context);
-                    },
-                    child: const Text('Backup'),
-                  ),
-                ),
-              ],
-            ),
-            //pasinting
-            const SizedBox(height: 10),
-
-            //card start
-            Container(
-              height: 270,
+        context: context,
+        builder: (BuildContext context) {
+          return AlertDialog(
+            contentPadding: EdgeInsets.zero,
+            shape:
+                RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+            backgroundColor: const Color.fromARGB(255, 178, 212, 240),
+            // title: Center(
+            //   child: Text(
+            //     'Shop Name',
+            //     style: GoogleFonts.italiana(
+            //       // Use your desired Google Font, e.g., 'lobster'
+            //       textStyle: const TextStyle(
+            //         color: Colors.black,
+            //         fontSize: 20,
+            //         fontWeight: FontWeight.bold,
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            content: Container(
+              height: 370,
               width: 500,
               child: Card(
                 elevation: 4.0,
@@ -517,7 +212,7 @@ class _calculateScreenState extends State<calculateScreen> {
                       Row(
                         children: [
                           TextBoxBold(
-                            text: 'Date   :',
+                            text: 'Date    :',
                           ),
                           SpaceBox(
                             size: 10,
@@ -538,15 +233,15 @@ class _calculateScreenState extends State<calculateScreen> {
                         // crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           TextBoxBold(text: 'Name  :  '),
-                          TextBoxNormal(text: "Name"),
+                          TextBoxNormal(text: customerNameConrl_.text),
                         ],
                       ),
                       Row(
                         // mainAxisAlignment: MainAxisAlignment.center,
                         // crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          TextBoxBold(text: "Sno    : "),
-                          TextBoxNormal(text: "Sno"),
+                          TextBoxBold(text: "Sno     : "),
+                          TextBoxNormal(text: (totalCount + 1).toString()),
                         ],
                       ),
                       SpaceBoxHeight(size: 10),
@@ -593,13 +288,396 @@ class _calculateScreenState extends State<calculateScreen> {
                           TextBoxNormal(text: result.toStringAsFixed(3)),
                         ],
                       ),
+
+                      //extra added : takephoto and cancel , submit button :
+                      SpaceBoxHeight(size: 10),
+                      Row(
+                        children: [
+                          ElevatedButton(
+                            onPressed: () async {
+                              final picker = ImagePicker();
+                              final pickedImage = await picker.pickImage(
+                                source: ImageSource.camera,
+                              );
+                              if (pickedImage != null) {
+                                setState(() {
+                                  selectedImage = File(pickedImage.path);
+                                  imagePath = pickedImage.path;
+                                  isImageUploaded = true;
+                                });
+                              } else {}
+                            },
+                            child: const Text('Take Photo'),
+                          ),
+                          const SizedBox(width: 16),
+                          isImageUploaded
+                              ? selectedImage != null
+                                  ? SizedBox(
+                                      width: 100,
+                                      height: 100,
+                                      child: Image.file(selectedImage!),
+                                    )
+                                  : const SizedBox(
+                                      width: 100,
+                                      height: 100,
+                                      child: Text('reTake'),
+                                    )
+                              : const SizedBox(),
+                        ],
+                      ),
                     ],
                   ),
                 ),
               ),
             ),
+            actions: [
+              TextButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                child: const Text('Cancel'),
+              ),
+              ElevatedButton(
+                onPressed: () {
+                  saveData();
+                  Navigator.pop(context);
+                },
+                child: const Text('Submit'),
+              ),
+            ],
+          );
+        });
+  }
+  //card alert end
 
-            //card end
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    timeAndDate();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        title: Text(
+          'MAHADEV GOLD CHECK',
+          style: GoogleFonts.italiana(
+            // Use your desired Google Font, e.g., 'lobster'
+            textStyle: const TextStyle(
+              color: Colors.black,
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
+        actions: [
+          IconButton(
+              onPressed: () {
+                const ProfileScreen();
+              },
+              icon: const Icon(FontAwesomeIcons.user))
+        ],
+      ),
+      body: Container(
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+            stops: [0.3, 1.0], // Adjust the stops as needed
+          ),
+        ),
+        alignment: Alignment.center,
+        padding: const EdgeInsets.all(32),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Weight",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor:
+                    Colors.white.withOpacity(0.5), // Transparent with white
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              controller: weightConrl_,
+              onChanged: (_) {
+                lessControllerInitialize();
+              },
+            ),
+
+            SpaceBoxHeight(size: 10),
+
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Percentage",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor: const Color.fromARGB(
+                    100, 178, 212, 240), // Light blue color
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              controller: perConrl_,
+            ),
+
+            SpaceBoxHeight(size: 10),
+
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Less",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor: Colors.pink[100], // Pink color
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.number,
+              controller: lessConrl_,
+            ),
+            SpaceBoxHeight(size: 10),
+            //end
+            TextField(
+              decoration: InputDecoration(
+                hintText: "Name of the Customer",
+                contentPadding:
+                    const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+                hintStyle: const TextStyle(
+                  color: Colors.black87,
+                  fontStyle: FontStyle.italic,
+                ),
+                filled: true,
+                fillColor:
+                    Colors.white.withOpacity(0.5), // Transparent with white
+                enabledBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderSide:
+                      const BorderSide(color: Colors.white70, width: 2.0),
+                  borderRadius: BorderRadius.circular(40),
+                ),
+              ),
+              keyboardType: TextInputType.name,
+              controller: customerNameConrl_,
+            ),
+            const SizedBox(height: 30),
+            //start
+
+            Center(
+              child: TextButtonTheme(
+                data: TextButtonThemeData(
+                  style: ButtonStyle(
+                    foregroundColor:
+                        MaterialStateProperty.all<Color>(Colors.white),
+                    backgroundColor: MaterialStateProperty.all<Color>(
+                        const Color.fromARGB(255, 2, 69, 124)),
+                    padding: MaterialStateProperty.all<EdgeInsets>(
+                      const EdgeInsets.symmetric(
+                          horizontal: 16.0, vertical: 8.0),
+                    ),
+                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                      RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16.0),
+                      ),
+                    ),
+                  ),
+                ),
+                child: TextButton(
+                  onPressed: () {
+                    setState(() {
+                      // weight = double.tryParse(weightConrl_.text) ?? 0.00;
+                      percentage = double.tryParse(perConrl_.text) ?? 0.00;
+                      less = double.tryParse(lessConrl_.text) ?? 0.00;
+                      if (less > 1) {
+                        less = less / 100;
+                      }
+                      perResult = percentage - (less);
+                      result = weight * (perResult) / 100;
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (context) => SearchBarScreen(
+                      //     //  weight_: weight,
+                      //     //  percentage_: percentage,
+                      //     //  result: result,
+                      //     ),
+                      //   ),
+                      // );
+
+                      showOutputtDialog(context);
+
+                      weightConrl_.clear();
+                      perConrl_.clear();
+                      lessConrl_.clear();
+                      customerNameConrl_.clear();
+                    });
+                  },
+                  child: const Text('Calculate'),
+                ),
+              ),
+            ),
+
+            const SizedBox(
+              width: 10,
+            ),
+            //backup button
+
+            //pasinting
+            const SizedBox(height: 10),
+
+            // //card start
+            // Container(
+            //   height: 270,
+            //   width: 500,
+            //   child: Card(
+            //     elevation: 4.0,
+            //     shape: RoundedRectangleBorder(
+            //       borderRadius: BorderRadius.circular(10.0),
+            //       side: const BorderSide(width: 2.0, color: Colors.white),
+            //     ),
+            //     child: Padding(
+            //       padding: const EdgeInsets.all(8.0),
+            //       child: Column(
+            //         crossAxisAlignment: CrossAxisAlignment.start,
+            //         children: [
+            //           Row(
+            //             children: [
+            //               TextBoxBold(
+            //                 text: 'Date   :',
+            //               ),
+            //               SpaceBox(
+            //                 size: 10,
+            //               ),
+            //               TextBoxNormal(
+            //                 text: formattedDate,
+            //               ),
+            //               SpaceBox(
+            //                 size: 10,
+            //               ),
+            //               TextBoxNormal(
+            //                   text:
+            //                       "${DateFormat('h:mm a').format(DateTime.now())}."),
+            //             ],
+            //           ),
+            //           Row(
+            //             // mainAxisAlignment: MainAxisAlignment.center,
+            //             // crossAxisAlignment: CrossAxisAlignment.center,
+            //             children: [
+            //               TextBoxBold(text: 'Name  :  '),
+            //               TextBoxNormal(text: "Name"),
+            //             ],
+            //           ),
+            //           Row(
+            //             // mainAxisAlignment: MainAxisAlignment.center,
+            //             // crossAxisAlignment: CrossAxisAlignment.center,
+            //             children: [
+            //               TextBoxBold(text: "Sno    : "),
+            //               TextBoxNormal(text: "Sno"),
+            //             ],
+            //           ),
+            //           SpaceBoxHeight(size: 10),
+            //           Row(
+            //             children: [
+            //               ColumnBox(
+            //                 weight: weight,
+            //                 text: "Kacha.Wt",
+            //                 num: 3,
+            //               ),
+            //               SpaceBox(size: 07),
+            //               ColumnBox(
+            //                 weight: percentage,
+            //                 text: "Touch%",
+            //                 num: 2,
+            //               ),
+            //               SpaceBox(size: 01),
+            //               ColumnBox(
+            //                 weight: less,
+            //                 text: "Less.",
+            //                 num: 2,
+            //               ),
+            //               SpaceBox(size: 01),
+            //               ColumnBox(
+            //                 weight: result,
+            //                 text: "Fine.Wt",
+            //                 num: 3,
+            //               ),
+            //               SpaceBox(size: 01),
+            //             ],
+            //           ),
+            //           SpaceBoxHeight(size: 20),
+            //           Row(
+            //             children: [
+            //               TextBoxBold(text: "KACHA Wt :"),
+            //               SpaceBox(size: 20),
+            //               TextBoxNormal(text: weight.toStringAsFixed(3)),
+            //             ],
+            //           ),
+            //           Row(
+            //             children: [
+            //               TextBoxBold(text: "Fine Wt :  "),
+            //               SpaceBox(size: 20),
+            //               TextBoxNormal(text: result.toStringAsFixed(3)),
+            //             ],
+            //           ),
+            //         ],
+            //       ),
+            //     ),
+            //   ),
+            // ),
+            // //card end
           ],
         ),
       ),
@@ -620,7 +698,7 @@ class ColumnBox extends StatelessWidget {
       // crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         TextBoxBold(text: text),
-        const Text("___________"),
+        const Text("__________"),
         TextBoxNormal(text: weight.toStringAsFixed(num)),
       ],
     );
