@@ -34,6 +34,7 @@ class _calculateScreenState extends State<calculateScreen> {
   double totalWeight = 0.0;
   int totalCount = 0;
   double perResult = 0.0;
+  String custmerName = '';
 
   Future<void> timeAndDate() async {
     String currentDate = DateTime.now()
@@ -140,7 +141,7 @@ class _calculateScreenState extends State<calculateScreen> {
         'less': less.toStringAsFixed(2),
         'percentage': percentage.toStringAsFixed(2),
         'result': result.toStringAsFixed(3),
-        'name': customerNameConrl_.text,
+        'name': custmerName,
         'image': imageUrl,
         'timeStamp': Timestamp.now(),
       }).then((value) => ToastMessage.toast_('sucesss'));
@@ -541,6 +542,7 @@ class _calculateScreenState extends State<calculateScreen> {
                       // weight = double.tryParse(weightConrl_.text) ?? 0.00;
                       percentage = double.tryParse(perConrl_.text) ?? 0.00;
                       less = double.tryParse(lessConrl_.text) ?? 0.00;
+                      custmerName = customerNameConrl_.text;
                       if (less > 1) {
                         less = less / 100;
                       }

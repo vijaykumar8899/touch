@@ -50,12 +50,21 @@ class _RecordsScreenState extends State<RecordsScreen> {
         centerTitle: true,
       ),
       body: Container(
+        // decoration: const BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topCenter,
+        //     end: Alignment.bottomCenter,
+        //     colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+        //     stops: [0.3, 1.0],
+        //   ),
+        // ),
+        // color: Colors.red,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
-            stops: [0.3, 1.0],
+          color: Color.fromARGB(
+            255,
+            178,
+            212,
+            240,
           ),
         ),
         child: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
@@ -102,8 +111,8 @@ class _RecordsScreenState extends State<RecordsScreen> {
                       ),
                       if (isArrowPressedList[index])
                         SizedBox(
-                          height: 700, // Set the height
-                          width: 350,
+                          height: 600,
+                          width: 340,
                           child: DisplayDataFromFirebase(
                               collectionPath: documentID),
                         ), // Show when arrow is pressed
@@ -154,6 +163,7 @@ class _DayDisplayContainerState extends State<DayDisplayContainer> {
               width: 1.5,
             ),
           ),
+          // color: Colors.blue,
           padding: const EdgeInsets.all(5),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -238,14 +248,19 @@ class DisplayDataFromFirebase extends StatelessWidget {
 
     return Scaffold(
       body: Container(
-        width: 300,
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
-            stops: [0.3, 1.0],
-          ),
+        width: 340,
+        // decoration: const BoxDecoration(
+        //   gradient: LinearGradient(
+        //     begin: Alignment.topCenter,
+        //     end: Alignment.bottomCenter,
+        //     colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+        //     stops: [0.3, 1.0],
+        //   ),
+        // ),
+        // color: Colors.green,
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.pink[100],
         ),
         child: StreamBuilder(
           stream: stream_,
@@ -270,7 +285,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
                 // Convert Firestore Timestamp to DateTime
                 DateTime dateTime = timeStamp.toDate();
 
-// Format DateTime object to a string in your desired format
+                // Format DateTime object to a string in your desired format
                 String formattedDateTime =
                     DateFormat('d MMMM y').add_jms().format(dateTime);
                 String url = doc['image'];
