@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:touch/Screens/CalculateScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordsScreen extends StatefulWidget {
   @override
@@ -14,11 +15,27 @@ class RecordsScreen extends StatefulWidget {
 class _RecordsScreenState extends State<RecordsScreen> {
   late List<bool> isArrowPressedList;
   int numberOfArrowIcons = 10;
+  late SharedPreferences prefs;
 
   @override
   void initState() {
     super.initState();
     isArrowPressedList = List.filled(numberOfArrowIcons, false);
+    _loadArrowStates();
+  }
+
+  Future<void> _loadArrowStates() async {
+    prefs = await SharedPreferences.getInstance();
+
+    for (int i = 0; i < numberOfArrowIcons; i++) {
+      setState(() {
+        isArrowPressedList[i] = prefs.getBool('arrowState_$i') ?? false;
+      });
+    }
+  }
+
+  Future<void> _saveArrowState(int index) async {
+    await prefs.setBool('arrowState_$index', isArrowPressedList[index]);
   }
 
   Future<QuerySnapshot<Map<String, dynamic>>> fetchAllDocuments() async {
@@ -26,6 +43,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         .collection('touchCollection')
         .doc('vijay')
         .collection('allRecordCalculation')
+        // .orderBy('timeStamp', descending: true)
         .get();
   }
 
@@ -106,12 +124,13 @@ class _RecordsScreenState extends State<RecordsScreen> {
                           setState(() {
                             isArrowPressedList[index] =
                                 !isArrowPressedList[index];
+                            _saveArrowState(index);
                           });
                         },
                       ),
                       if (isArrowPressedList[index])
                         SizedBox(
-                          height: 600,
+                          height: 550,
                           width: 340,
                           child: DisplayDataFromFirebase(
                               collectionPath: documentID),
