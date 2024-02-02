@@ -3,9 +3,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
 import 'package:touch/Screens/RegisterScreens/RegisterScreen.dart';
-import 'package:touch/Screens/TabsScreen.dart';
+import 'package:touch/Screens/TabScreens/TabsScreen.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -46,31 +47,29 @@ class LoginScreenState extends State<LoginScreen> {
         String Admin = document['Admin'];
 
         // Save user data to SharedPreferences
-
-        // Save user data to SharedPreferences
-        // SharedPreferences prefs = await SharedPreferences.getInstance();
-        // await prefs.setString('userPhoneNumber', userPhoneNumber);
-        // await prefs.setString('userEmail', userEmail);
-        // await prefs.setString('userName', userName);
-        // await prefs.setString('userCity', userCity);
-        // await prefs.setString('Admin', Admin);
+        SharedPreferences prefs = await SharedPreferences.getInstance();
+        await prefs.setString('userPhoneNumber', userPhoneNumber);
+        await prefs.setString('userEmail', userEmail);
+        await prefs.setString('userName', userName);
+        await prefs.setString('userCity', userCity);
+        await prefs.setString('Admin', Admin);
 
         print('User data saved to SharedPreferences');
-        // Get.offAll(TabsScreen());
+        Get.offAll(TabsScreen());
         setState(() {
           isLoading = false;
         });
       } else {
         // If the phone number does not exist in the 'users' collection, return null
         print('User not found in Firestore');
-        // Navigator.push(
-        //   context,
-        //   MaterialPageRoute(
-        //     builder: (context) => userDetailsScreen(
-        //       userPhoneNumber_: _userPhoneNumber,
-        //     ),
-        //   ),
-        // );
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RegisterScreen(
+              userPhoneNumber_: _userPhoneNumber,
+            ),
+          ),
+        );
         setState(() {
           isLoading = false;
         });
@@ -246,34 +245,78 @@ class LoginScreenState extends State<LoginScreen> {
               name_: TextInputType.number,
               controller_: otpController_,
             ),
-            Center(
-              child: TextButtonTheme(
-                data: TextButtonThemeData(
-                  style: ButtonStyle(
-                    foregroundColor:
-                        MaterialStateProperty.all<Color>(Colors.white),
-                    backgroundColor: MaterialStateProperty.all<Color>(
-                        const Color.fromARGB(255, 2, 69, 124)),
-                    padding: MaterialStateProperty.all<EdgeInsets>(
-                      const EdgeInsets.symmetric(
-                          horizontal: 16.0, vertical: 8.0),
-                    ),
-                    shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                      RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(4.0),
+            if (otpSent) ...[
+              Center(
+                child: TextButtonTheme(
+                  data: TextButtonThemeData(
+                    style: ButtonStyle(
+                      foregroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 2, 69, 124)),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
                       ),
                     ),
                   ),
-                ),
-                child: TextButton(
-                  onPressed: () {
-                    Get.to(RegisterScreen());
-                    // ToastMessage.toast_(nameController_.text);
-                  },
-                  child: const Text('Login/ Signup'),
+                  child: TextButton(
+                    onPressed: () {
+                      if (otpController_.text.length == 6) {
+                        setState(() {
+                          isLoading = true; // Set loading to true
+                        });
+                        verifyOTP(otpController_.text);
+                        FocusScope.of(context).unfocus();
+                      } else {
+                        ToastMessage.toast_(
+                            "You entered ${otpController_.text.length} digits of OTP only; please enter 6 digits of OTP.");
+                      }
+                    },
+                    child: const Text('Verify OTP'),
+                  ),
                 ),
               ),
-            ),
+            ] else ...[
+              Center(
+                child: TextButtonTheme(
+                  data: TextButtonThemeData(
+                    style: ButtonStyle(
+                      foregroundColor:
+                          MaterialStateProperty.all<Color>(Colors.white),
+                      backgroundColor: MaterialStateProperty.all<Color>(
+                          const Color.fromARGB(255, 2, 69, 124)),
+                      padding: MaterialStateProperty.all<EdgeInsets>(
+                        const EdgeInsets.symmetric(
+                            horizontal: 16.0, vertical: 8.0),
+                      ),
+                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
+                        RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(4.0),
+                        ),
+                      ),
+                    ),
+                  ),
+                  child: TextButton(
+                    onPressed: () {
+                      setState(() {
+                        isLoading = true; // Set loading to true
+                      });
+                      loginWithPhone();
+                      setState(() {
+                        showOTPField = true;
+                      });
+                    },
+                    child: const Text('Send OTP'),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),

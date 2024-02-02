@@ -7,21 +7,25 @@ import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:touch/Screens/ProfileScreen.dart';
+import 'package:touch/Screens/TabScreens/ProfileScreen.dart';
 
-class calculateScreen extends StatefulWidget {
+class HomeScreen extends StatefulWidget {
   @override
-  State<calculateScreen> createState() => _calculateScreenState();
+  State<HomeScreen> createState() => _HomeScreenState();
+
+  static String? userPhoneNumber;
+  static String? userName;
 }
 
-class _calculateScreenState extends State<calculateScreen> {
+class _HomeScreenState extends State<HomeScreen> {
   TextEditingController weightConrl_ = TextEditingController();
   TextEditingController perConrl_ = TextEditingController();
   TextEditingController lessConrl_ = TextEditingController();
   TextEditingController customerNameConrl_ = TextEditingController();
-  bool isLoading = true;
+  bool isLoading = false;
 
   double result = 0;
   double weight = 0.0;
@@ -37,6 +41,16 @@ class _calculateScreenState extends State<calculateScreen> {
   int totalCount = 0;
   double perResult = 0.0;
   String custmerName = '';
+
+  getUserDetailsFromSharedPref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    setState(() {
+      HomeScreen.userPhoneNumber = prefs.getString('userPhoneNumber');
+      HomeScreen.userName = prefs.getString('userName');
+      // print(
+      //     "getUseDetails : userPHone_: $userPhoneNumber , userName_=$userName");
+    });
+  }
 
   Future<void> timeAndDate() async {
     String currentDate = DateTime.now()
@@ -57,7 +71,7 @@ class _calculateScreenState extends State<calculateScreen> {
     try {
       DocumentSnapshot<Map<String, dynamic>> docSnapshot = await firestore
           .collection(mainFolder)
-          .doc('vijay')
+          .doc(HomeScreen.userPhoneNumber)
           .collection('allRecordCalculation')
           .doc(formattedDate)
           .get();
@@ -136,7 +150,7 @@ class _calculateScreenState extends State<calculateScreen> {
 
       await firebase
           .collection(mainFolder)
-          .doc('vijay')
+          .doc(HomeScreen.userPhoneNumber)
           .collection(formattedDate)
           .add({
         'order': totalCount,
@@ -151,7 +165,7 @@ class _calculateScreenState extends State<calculateScreen> {
 
       await firebase
           .collection(mainFolder)
-          .doc('vijay')
+          .doc(HomeScreen.userPhoneNumber)
           .collection('allRecordCalculation')
           .doc(formattedDate)
           .set({
@@ -360,9 +374,11 @@ class _calculateScreenState extends State<calculateScreen> {
 
   @override
   void initState() {
-    // TODO: implement initState
-    super.initState();
     timeAndDate();
+    getUserDetailsFromSharedPref().then((_) {
+      print(
+          "initstate : userPHone: ${HomeScreen.userPhoneNumber} , userName=${HomeScreen.userName}");
+    });
   }
 
   @override
@@ -371,7 +387,7 @@ class _calculateScreenState extends State<calculateScreen> {
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
-          'MAHADEV GOLD CHECK',
+          HomeScreen.userName ?? '',
           style: GoogleFonts.italiana(
             // Use your desired Google Font, e.g., 'lobster'
             textStyle: const TextStyle(

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:intl/intl.dart';
 import 'package:photo_view/photo_view.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:touch/Screens/CalculateScreen.dart';
+import 'package:touch/Screens/TabScreens/HomeScreen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class RecordsScreen extends StatefulWidget {
@@ -20,6 +20,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
   @override
   void initState() {
     super.initState();
+
     isArrowPressedList = List.filled(numberOfArrowIcons, false);
     _loadArrowStates();
   }
@@ -41,7 +42,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
   Future<QuerySnapshot<Map<String, dynamic>>> fetchAllDocuments() async {
     return await FirebaseFirestore.instance
         .collection('touchCollection')
-        .doc('vijay')
+        .doc(HomeScreen.userPhoneNumber)
         .collection('allRecordCalculation')
         // .orderBy('timeStamp', descending: true)
         .get();
@@ -231,7 +232,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
   Widget build(BuildContext context) {
     var stream_ = FirebaseFirestore.instance
         .collection('touchCollection')
-        .doc('vijay')
+        .doc(HomeScreen.userPhoneNumber)
         .collection(collectionPath) // Replace with your date
         .orderBy('timeStamp', descending: true)
         .snapshots();
@@ -454,7 +455,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
                               if (doc['image'].toString().isNotEmpty)
                                 GestureDetector(
                                   onTap: () {
-                                    _showImagePopup(context, url);
+                                    _showImagePopup(context, doc['image']);
                                   },
                                   child: SizedBox(
                                     height: 50,

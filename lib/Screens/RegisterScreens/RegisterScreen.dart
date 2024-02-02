@@ -3,19 +3,64 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
-import 'package:touch/Screens/TabsScreen.dart';
+import 'package:touch/Screens/TabScreens/TabsScreen.dart';
 
 class RegisterScreen extends StatefulWidget {
-  const RegisterScreen({super.key});
+  String userPhoneNumber_;
+
+  RegisterScreen({required this.userPhoneNumber_});
 
   @override
   State<RegisterScreen> createState() => _RegisterScreenState();
 }
 
 class _RegisterScreenState extends State<RegisterScreen> {
-  TextEditingController nameController_ = TextEditingController();
-  TextEditingController cityController_ = TextEditingController();
+  TextEditingController _userNameCtrl = TextEditingController();
+  TextEditingController _userEmailCtrl = TextEditingController();
+  TextEditingController _userCityCtrl = TextEditingController();
+  bool isLoading = false;
+  String tempName = '';
+  bool isCity = false;
+  bool isfullName = false;
+
+  Future<void> saveUserDataToFirestoreAndSharedPreferences() async {
+    try {
+      final FirebaseFirestore firestore = FirebaseFirestore.instance;
+      // String? pushNotificationToken =
+      //     await FirebaseMessaging.instance.getToken();
+      // print(pushNotificationToken);
+
+      await firestore.collection('users').add({
+        'userPhoneNumber': widget.userPhoneNumber_,
+        'userName': _userNameCtrl.text,
+        'userEmail': _userEmailCtrl.text,
+        'userCity': _userCityCtrl.text,
+        'Admin': '',
+        // 'notificationtoken': pushNotificationToken,
+        'TimeStamp': Timestamp.now(),
+      });
+
+      // Save user data to SharedPreferences
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      // await prefs.setString('userPhoneNumber', _userPhoneCtrl.text);
+      await prefs.setString('userName', _userNameCtrl.text);
+      await prefs.setString('userEmail', _userEmailCtrl.text);
+      await prefs.setString('userCity', _userCityCtrl.text);
+      await prefs.setString('userPhoneNumber', widget.userPhoneNumber_);
+
+      print('User data saved to Firestore and SharedPreferences');
+      setState(() {
+        isLoading = false;
+      });
+    } catch (e) {
+      print('Error saving user data: $e');
+      setState(() {
+        isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +101,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 exText: "Ex: Testing Center",
                 text: 'Name',
                 name_: TextInputType.name,
-                controller_: nameController_,
+                controller_: _userNameCtrl,
+              ),
+              InputClass(
+                exText: "Ex: email8899@gmail.com",
+                text: 'Email',
+                name_: TextInputType.emailAddress,
+                controller_: _userEmailCtrl,
               ),
               InputClass(
                 exText: "Ex: Jaggayyapeta",
                 text: 'City',
                 name_: TextInputType.name,
-                controller_: cityController_,
+                controller_: _userCityCtrl,
               ),
               Center(
                 child: TextButtonTheme(
@@ -84,9 +135,38 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     ),
                   ),
                   child: TextButton(
-                    onPressed: () {
-                      Get.to(TabsScreen());
-                      // ToastMessage.toast_(nameController_.text);
+                    onPressed: () async {
+                      setState(() {
+                        isLoading = true; // Set loading to true
+                      });
+                      if (_userNameCtrl.text.isNotEmpty &&
+                          _userCityCtrl.text.isNotEmpty) {
+                        await saveUserDataToFirestoreAndSharedPreferences();
+                        // Get.offAll(TabsScreen());
+                        Get.offAll(TabsScreen());
+                      } else if (_userNameCtrl.text.isNotEmpty &&
+                          _userCityCtrl.text.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+
+                        ToastMessage.toast_("Please enter City name!");
+                      } else if (_userNameCtrl.text.isEmpty &&
+                          _userCityCtrl.text.isNotEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+
+                        ToastMessage.toast_("Please enter Full Name!");
+                      } else if (_userNameCtrl.text.isEmpty &&
+                          _userCityCtrl.text.isEmpty) {
+                        setState(() {
+                          isLoading = false;
+                        });
+
+                        ToastMessage.toast_(
+                            "Please enter Full name and City name!");
+                      }
                     },
                     child: const Text('Submit'),
                   ),

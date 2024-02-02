@@ -2,9 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:touch/Screens/RecordsScreen.dart';
-import 'package:touch/Screens/CalculateScreen.dart';
- 
+import 'package:touch/Screens/TabScreens/RecordsScreen.dart';
+import 'package:touch/Screens/TabScreens/HomeScreen.dart';
+
 class TabsScreen extends StatefulWidget {
   @override
   _TabScreenState createState() => _TabScreenState();
@@ -13,7 +13,7 @@ class TabsScreen extends StatefulWidget {
 class _TabScreenState extends State<TabsScreen> {
   int _currentIndex = 0;
   final List _pages = [
-    calculateScreen(),
+    HomeScreen(),
     RecordsScreen(),
     // DisplayDataFromFirebase(),
   ];
