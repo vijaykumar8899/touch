@@ -1,3 +1,4 @@
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -228,6 +229,47 @@ class DisplayDataFromFirebase extends StatelessWidget {
 
   DisplayDataFromFirebase({super.key, required this.collectionPath});
 
+  void showDeleteConfirmationDialog(
+      String documentId, context, String imageUrl) {
+    final firestore = FirebaseFirestore.instance;
+    final storage = FirebaseStorage.instance;
+    final collection = firestore
+        .collection('touchCollection')
+        .doc(HomeScreen.userPhoneNumber)
+        .collection(collectionPath);
+
+    Reference imageRef = storage.refFromURL(imageUrl);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext outerContext) {
+        return AlertDialog(
+          title: const Text('Do you want to delete record?'),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                // DeleteOrmakeAdmin(documentId, userName, 'Admin', outerContext);
+                print('docId : $documentId');
+                Navigator.of(context).pop();
+              },
+              child: const Text('No'),
+            ),
+            TextButton(
+              onPressed: () async {
+                // DeleteOrmakeAdmin(documentId, userName, 'Delete', outerContext);
+                print('docId : $documentId');
+                await collection.doc(documentId).delete();
+                await imageRef.delete();
+                Navigator.of(context).pop();
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     var stream_ = FirebaseFirestore.instance
@@ -308,167 +350,126 @@ class DisplayDataFromFirebase extends StatelessWidget {
                 // Format DateTime object to a string in your desired format
                 String formattedDateTime =
                     DateFormat('d MMMM y').add_jms().format(dateTime);
-                String url = doc['image'];
 
-                // // Access fields from the document and display them in ListTile
-                // return ListTile(
-                //   title: Row(
-                //     children: [
-                //       Text(
-                //         '${doc['order']}',
-                //         style: const TextStyle(fontWeight: FontWeight.bold),
-                //       ),
-                //       const SizedBox(
-                //         width: 15,
-                //       ),
-                //       Column(
-                //         crossAxisAlignment: CrossAxisAlignment.start,
-                //         children: [
-                //           Text('Name: ${doc['name']}'),
-                //           Text('Weight: ${doc['weight']}'),
-                //           Text('Percentage: ${doc['percentage']}'),
-                //           Text('Less: ${doc['less']}'),
-                //           Text('Result: ${doc['result']}'),
-                //           Text(formattedDateTime),
-                //         ],
-                //       ),
-                //       const SizedBox(
-                //         width: 20,
-                //       ),
-                //       if (doc['image'].toString().isNotEmpty)
-                //         GestureDetector(
-                //           onTap: () {
-                //             _showImagePopup(context, url);
-                //           },
-                //           child: SizedBox(
-                //             height: 50,
-                //             width: 50,
-                //             child: Image.network(
-                //               doc['image'],
-                //               fit: BoxFit.cover,
-                //             ),
-                //           ),
-                //         ),
-                //     ],
-                //   ),
-                //   subtitle: const SizedBox(
-                //     height: 20,
-                //   ),
-                // );
-                return Container(
-                  height: 270,
-                  width: 300,
-                  child: Card(
-                    elevation: 4.0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10.0),
-                      side: const BorderSide(width: 2.0, color: Colors.white),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Row(
-                            children: [
-                              TextBoxBold(
-                                text: 'Date   :',
-                              ),
-                              SpaceBox(
-                                size: 10,
-                              ),
-                              TextBoxNormal(
-                                text: formattedDateTime,
-                              ),
-                            ],
-                          ),
-                          Row(
-                            // mainAxisAlignment: MainAxisAlignment.center,
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              TextBoxBold(text: 'Name  :  '),
-                              TextBoxNormal(text: doc['name']),
-                            ],
-                          ),
-                          Row(
-                            // mainAxisAlignment: MainAxisAlignment.center,
-                            // crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              TextBoxBold(text: "Sno    : "),
-                              TextBoxNormal(
-                                text: '${doc['order']}',
-                              ),
-                            ],
-                          ),
-                          SpaceBoxHeight(size: 10),
-                          Row(
-                            children: [
-                              ColumnBox(
-                                weight: double.tryParse(doc['weight']) ?? 0.0,
-                                text: 'Kacha.Wt',
-                                num: 3,
-                              ),
-                              SpaceBox(size: 07),
-                              ColumnBox(
-                                weight:
-                                    double.tryParse(doc['percentage']) ?? 0.0,
-                                text: "Touch%",
-                                num: 2,
-                              ),
-                              SpaceBox(size: 01),
-                              ColumnBox(
-                                weight: double.tryParse(doc['less']) ?? 0.0,
-                                text: "Less.",
-                                num: 2,
-                              ),
-                              SpaceBox(size: 01),
-                              ColumnBox(
-                                weight: double.tryParse(doc['result']) ?? 0.0,
-                                text: "Fine.Wt",
-                                num: 3,
-                              ),
-                              SpaceBox(size: 01),
-                            ],
-                          ),
-                          SpaceBoxHeight(size: 20),
-                          Row(
-                            children: [
-                              Column(
-                                children: [
-                                  Row(
-                                    children: [
-                                      TextBoxBold(text: "KACHA Wt :"),
-                                      SpaceBox(size: 20),
-                                      TextBoxNormal(text: doc['weight']),
-                                    ],
-                                  ),
-                                  Row(
-                                    children: [
-                                      TextBoxBold(text: "Fine Wt :  "),
-                                      SpaceBox(size: 20),
-                                      TextBoxNormal(text: doc['result']),
-                                    ],
-                                  ),
-                                ],
-                              ),
-                              SpaceBox(size: 30),
-                              if (doc['image'].toString().isNotEmpty)
-                                GestureDetector(
-                                  onTap: () {
-                                    _showImagePopup(context, doc['image']);
-                                  },
-                                  child: SizedBox(
-                                    height: 50,
-                                    width: 50,
-                                    child: Image.network(
-                                      doc['image'],
-                                      fit: BoxFit.cover,
+                return GestureDetector(
+                  onLongPress: () {
+                    showDeleteConfirmationDialog(doc.id, context, doc['image']);
+                  },
+                  child: Container(
+                    height: 270,
+                    width: 300,
+                    child: Card(
+                      elevation: 4.0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10.0),
+                        side: const BorderSide(width: 2.0, color: Colors.white),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                TextBoxBold(
+                                  text: 'Date   :',
+                                ),
+                                SpaceBox(
+                                  size: 10,
+                                ),
+                                TextBoxNormal(
+                                  text: formattedDateTime,
+                                ),
+                              ],
+                            ),
+                            Row(
+                              // mainAxisAlignment: MainAxisAlignment.center,
+                              // crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                TextBoxBold(text: 'Name  :  '),
+                                TextBoxNormal(text: doc['name']),
+                              ],
+                            ),
+                            Row(
+                              // mainAxisAlignment: MainAxisAlignment.center,
+                              // crossAxisAlignment: CrossAxisAlignment.center,
+                              children: [
+                                TextBoxBold(text: "Sno    : "),
+                                TextBoxNormal(
+                                  text: '${doc['order']}',
+                                ),
+                              ],
+                            ),
+                            SpaceBoxHeight(size: 10),
+                            Row(
+                              children: [
+                                ColumnBox(
+                                  weight: double.tryParse(doc['weight']) ?? 0.0,
+                                  text: 'Kacha.Wt',
+                                  num: 3,
+                                ),
+                                SpaceBox(size: 07),
+                                ColumnBox(
+                                  weight:
+                                      double.tryParse(doc['percentage']) ?? 0.0,
+                                  text: "Touch%",
+                                  num: 2,
+                                ),
+                                SpaceBox(size: 01),
+                                ColumnBox(
+                                  weight: double.tryParse(doc['less']) ?? 0.0,
+                                  text: "Less.",
+                                  num: 2,
+                                ),
+                                SpaceBox(size: 01),
+                                ColumnBox(
+                                  weight: double.tryParse(doc['result']) ?? 0.0,
+                                  text: "Fine.Wt",
+                                  num: 3,
+                                ),
+                                SpaceBox(size: 01),
+                              ],
+                            ),
+                            SpaceBoxHeight(size: 20),
+                            Row(
+                              children: [
+                                Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        TextBoxBold(text: "KACHA Wt :"),
+                                        SpaceBox(size: 20),
+                                        TextBoxNormal(text: doc['weight']),
+                                      ],
+                                    ),
+                                    Row(
+                                      children: [
+                                        TextBoxBold(text: "Fine Wt :  "),
+                                        SpaceBox(size: 20),
+                                        TextBoxNormal(text: doc['result']),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                                SpaceBox(size: 30),
+                                if (doc['image'].toString().isNotEmpty)
+                                  GestureDetector(
+                                    onTap: () {
+                                      _showImagePopup(context, doc['image']);
+                                    },
+                                    child: SizedBox(
+                                      height: 50,
+                                      width: 50,
+                                      child: Image.network(
+                                        doc['image'],
+                                        fit: BoxFit.cover,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),

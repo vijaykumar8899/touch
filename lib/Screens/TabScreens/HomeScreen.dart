@@ -124,19 +124,6 @@ class _HomeScreenState extends State<HomeScreen> {
     try {
       FirebaseFirestore firebase = FirebaseFirestore.instance;
       // ToastMessage.toast_(isImageUploaded.toString());
-      if (isImageUploaded) {
-        // ToastMessage.toast_('inside imageUPload');
-        FirebaseStorage storage = FirebaseStorage.instance;
-
-        final storageRef = storage.ref().child(mainFolder);
-
-        final uploadTask = storageRef.putFile(File(imagePath));
-        var snapshot = await uploadTask;
-        // .whenComplete(() => ToastMessage.toast_('Uploaded image'));
-
-        imageUrl = await snapshot.ref.getDownloadURL();
-      }
-
       await getTotalWeightAndCount();
       print('totalCount in saveFire : $totalCount');
 
@@ -146,6 +133,22 @@ class _HomeScreenState extends State<HomeScreen> {
       print('totalCount in saveFire2 : $totalCount');
 
       totalWeight += result;
+
+      if (isImageUploaded) {
+        // ToastMessage.toast_('inside imageUPload');
+        FirebaseStorage storage = FirebaseStorage.instance;
+
+        final storageRef = storage
+            .ref()
+            .child('$mainFolder/${HomeScreen.userPhoneNumber}/$totalCount');
+
+        final uploadTask = storageRef.putFile(File(imagePath));
+        var snapshot = await uploadTask;
+        // .whenComplete(() => ToastMessage.toast_('Uploaded image'));
+
+        imageUrl = await snapshot.ref.getDownloadURL();
+      }
+
       // ToastMessage.toast_('weight : $totalWeight , count: $totalCount');
 
       await firebase
@@ -252,7 +255,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           TextBoxBold(text: 'Name  :  '),
-                          TextBoxNormal(text: customerNameConrl_.text),
+                          TextBoxNormal(text: custmerName),
                         ],
                       ),
                       Row(
