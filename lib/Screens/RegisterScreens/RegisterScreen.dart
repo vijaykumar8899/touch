@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
+import 'package:touch/Screens/TabScreens/HomeScreen.dart';
 import 'package:touch/Screens/TabScreens/TabsScreen.dart';
 
 class RegisterScreen extends StatefulWidget {
@@ -82,97 +84,103 @@ class _RegisterScreenState extends State<RegisterScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
-            stops: [0.3, 1.0], // Adjust the stops as needed
-          ),
-        ),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              InputClass(
-                exText: "Ex: Testing Center",
-                text: 'Name',
-                name_: TextInputType.name,
-                controller_: _userNameCtrl,
+      body: Stack(
+        children: [
+          Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+                stops: [0.3, 1.0], // Adjust the stops as needed
               ),
-              InputClass(
-                exText: "Ex: email8899@gmail.com",
-                text: 'Email',
-                name_: TextInputType.emailAddress,
-                controller_: _userEmailCtrl,
-              ),
-              InputClass(
-                exText: "Ex: Jaggayyapeta",
-                text: 'City',
-                name_: TextInputType.name,
-                controller_: _userCityCtrl,
-              ),
-              Center(
-                child: TextButtonTheme(
-                  data: TextButtonThemeData(
-                    style: ButtonStyle(
-                      foregroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 2, 69, 124)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0),
+            ),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(32),
+            child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  InputClass(
+                    exText: "Ex: Testing Center",
+                    text: 'Name',
+                    name_: TextInputType.name,
+                    controller_: _userNameCtrl,
+                  ),
+                  InputClass(
+                    exText: "Ex: email8899@gmail.com",
+                    text: 'Email',
+                    name_: TextInputType.emailAddress,
+                    controller_: _userEmailCtrl,
+                  ),
+                  InputClass(
+                    exText: "Ex: Jaggayyapeta",
+                    text: 'City',
+                    name_: TextInputType.name,
+                    controller_: _userCityCtrl,
+                  ),
+                  Center(
+                    child: TextButtonTheme(
+                      data: TextButtonThemeData(
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.white),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              const Color.fromARGB(255, 2, 69, 124)),
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                          ),
                         ),
+                      ),
+                      child: TextButton(
+                        onPressed: () async {
+                          setState(() {
+                            isLoading = true; // Set loading to true
+                          });
+                          if (_userNameCtrl.text.isNotEmpty &&
+                              _userCityCtrl.text.isNotEmpty) {
+                            await saveUserDataToFirestoreAndSharedPreferences();
+                            // Get.offAll(TabsScreen());
+                            Get.offAll(TabsScreen());
+                          } else if (_userNameCtrl.text.isNotEmpty &&
+                              _userCityCtrl.text.isEmpty) {
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            ToastMessage.toast_("Please enter City name!");
+                          } else if (_userNameCtrl.text.isEmpty &&
+                              _userCityCtrl.text.isNotEmpty) {
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            ToastMessage.toast_("Please enter Full Name!");
+                          } else if (_userNameCtrl.text.isEmpty &&
+                              _userCityCtrl.text.isEmpty) {
+                            setState(() {
+                              isLoading = false;
+                            });
+
+                            ToastMessage.toast_(
+                                "Please enter Full name and City name!");
+                          }
+                        },
+                        child: const Text('Submit'),
                       ),
                     ),
                   ),
-                  child: TextButton(
-                    onPressed: () async {
-                      setState(() {
-                        isLoading = true; // Set loading to true
-                      });
-                      if (_userNameCtrl.text.isNotEmpty &&
-                          _userCityCtrl.text.isNotEmpty) {
-                        await saveUserDataToFirestoreAndSharedPreferences();
-                        // Get.offAll(TabsScreen());
-                        Get.offAll(TabsScreen());
-                      } else if (_userNameCtrl.text.isNotEmpty &&
-                          _userCityCtrl.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        ToastMessage.toast_("Please enter City name!");
-                      } else if (_userNameCtrl.text.isEmpty &&
-                          _userCityCtrl.text.isNotEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        ToastMessage.toast_("Please enter Full Name!");
-                      } else if (_userNameCtrl.text.isEmpty &&
-                          _userCityCtrl.text.isEmpty) {
-                        setState(() {
-                          isLoading = false;
-                        });
-
-                        ToastMessage.toast_(
-                            "Please enter Full name and City name!");
-                      }
-                    },
-                    child: const Text('Submit'),
-                  ),
-                ),
-              ),
-            ]),
+                ]),
+          ),
+          Visibility(visible: isLoading, child: LoadingClass()),
+        ],
       ),
     );
   }

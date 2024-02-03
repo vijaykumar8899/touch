@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
 import 'package:touch/Screens/RegisterScreens/RegisterScreen.dart';
+import 'package:touch/Screens/TabScreens/HomeScreen.dart';
 import 'package:touch/Screens/TabScreens/TabsScreen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -210,115 +212,125 @@ class LoginScreenState extends State<LoginScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Container(
-        // decoration: const BoxDecoration(
-        //   color: Color.fromARGB(
-        //     255,
-        //     178,
-        //     212,
-        //     240,
-        //   ),
-        // ),
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
-            stops: [0.3, 1.0],
+      body: Stack(
+        children: [
+          Container(
+            // decoration: const BoxDecoration(
+            //   color: Color.fromARGB(
+            //     255,
+            //     178,
+            //     212,
+            //     240,
+            //   ),
+            // ),
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.topCenter,
+                end: Alignment.bottomCenter,
+                colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+                stops: [0.3, 1.0],
+              ),
+            ),
+            alignment: Alignment.center,
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                InputClass(
+                  exText: "Ex: 9123456789",
+                  text: 'Number',
+                  name_: TextInputType.number,
+                  controller_: _phoneNumberCtrl,
+                ),
+                InputClass(
+                  exText: "Ex: 123456",
+                  text: 'OTP',
+                  name_: TextInputType.number,
+                  controller_: otpController_,
+                ),
+                if (otpSent) ...[
+                  Center(
+                    child: TextButtonTheme(
+                      data: TextButtonThemeData(
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.white),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              const Color.fromARGB(255, 2, 69, 124)),
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      child: TextButton(
+                        onPressed: () {
+                          if (otpController_.text.length == 6) {
+                            setState(() {
+                              isLoading = true; // Set loading to true
+                            });
+                            verifyOTP(otpController_.text);
+                            FocusScope.of(context).unfocus();
+                          } else {
+                            ToastMessage.toast_(
+                                "You entered ${otpController_.text.length} digits of OTP only; please enter 6 digits of OTP.");
+                          }
+                        },
+                        child: const Text('Verify OTP'),
+                      ),
+                    ),
+                  ),
+                ] else ...[
+                  Center(
+                    child: TextButtonTheme(
+                      data: TextButtonThemeData(
+                        style: ButtonStyle(
+                          foregroundColor:
+                              MaterialStateProperty.all<Color>(Colors.white),
+                          backgroundColor: MaterialStateProperty.all<Color>(
+                              const Color.fromARGB(255, 2, 69, 124)),
+                          padding: MaterialStateProperty.all<EdgeInsets>(
+                            const EdgeInsets.symmetric(
+                                horizontal: 16.0, vertical: 8.0),
+                          ),
+                          shape:
+                              MaterialStateProperty.all<RoundedRectangleBorder>(
+                            RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(4.0),
+                            ),
+                          ),
+                        ),
+                      ),
+                      child: TextButton(
+                        onPressed: () {
+                          setState(() {
+                            isLoading = true; // Set loading to true
+                          });
+                          loginWithPhone();
+                          setState(() {
+                            showOTPField = true;
+                          });
+                        },
+                        child: const Text('Send OTP'),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
-        ),
-        alignment: Alignment.center,
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            InputClass(
-              exText: "Ex: 9123456789",
-              text: 'Number',
-              name_: TextInputType.number,
-              controller_: _phoneNumberCtrl,
-            ),
-            InputClass(
-              exText: "Ex: 123456",
-              text: 'OTP',
-              name_: TextInputType.number,
-              controller_: otpController_,
-            ),
-            if (otpSent) ...[
-              Center(
-                child: TextButtonTheme(
-                  data: TextButtonThemeData(
-                    style: ButtonStyle(
-                      foregroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 2, 69, 124)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      if (otpController_.text.length == 6) {
-                        setState(() {
-                          isLoading = true; // Set loading to true
-                        });
-                        verifyOTP(otpController_.text);
-                        FocusScope.of(context).unfocus();
-                      } else {
-                        ToastMessage.toast_(
-                            "You entered ${otpController_.text.length} digits of OTP only; please enter 6 digits of OTP.");
-                      }
-                    },
-                    child: const Text('Verify OTP'),
-                  ),
-                ),
-              ),
-            ] else ...[
-              Center(
-                child: TextButtonTheme(
-                  data: TextButtonThemeData(
-                    style: ButtonStyle(
-                      foregroundColor:
-                          MaterialStateProperty.all<Color>(Colors.white),
-                      backgroundColor: MaterialStateProperty.all<Color>(
-                          const Color.fromARGB(255, 2, 69, 124)),
-                      padding: MaterialStateProperty.all<EdgeInsets>(
-                        const EdgeInsets.symmetric(
-                            horizontal: 16.0, vertical: 8.0),
-                      ),
-                      shape: MaterialStateProperty.all<RoundedRectangleBorder>(
-                        RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(4.0),
-                        ),
-                      ),
-                    ),
-                  ),
-                  child: TextButton(
-                    onPressed: () {
-                      setState(() {
-                        isLoading = true; // Set loading to true
-                      });
-                      loginWithPhone();
-                      setState(() {
-                        showOTPField = true;
-                      });
-                    },
-                    child: const Text('Send OTP'),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
+          Visibility(
+            visible: isLoading,
+            child: LoadingClass(),
+          ),
+        ],
       ),
     );
   }

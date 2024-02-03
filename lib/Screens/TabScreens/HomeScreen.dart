@@ -378,10 +378,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     timeAndDate();
-    getUserDetailsFromSharedPref().then((_) {
-      print(
-          "initstate : userPHone: ${HomeScreen.userPhoneNumber} , userName=${HomeScreen.userName}");
-    });
+    getUserDetailsFromSharedPref();
+    // .then((_) {
+    //   print(
+    //       "initstate : userPHone: ${HomeScreen.userPhoneNumber} , userName=${HomeScreen.userName}");
+    // });
   }
 
   @override
@@ -715,14 +716,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Visibility(
             visible: isLoading,
-            child: const SpinKitThreeInOut(
-              size: 50,
-              color: Color.fromARGB(
-                255,
-                178,
-                212,
-                240,
-              ),
+            child: const SpinKitCircle(
+              size: 75,
+              color: Color.fromARGB(255, 5, 97, 171),
             ),
           ),
         ],
@@ -809,6 +805,16 @@ class SpaceBoxHeight extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       height: size,
+    );
+  }
+}
+
+class LoadingClass extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return SpinKitCircle(
+      size: 75,
+      color: Color.fromARGB(255, 5, 97, 171),
     );
   }
 }
