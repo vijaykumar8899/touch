@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:get/get.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -18,6 +19,8 @@ class HomeScreen extends StatefulWidget {
 
   static String? userPhoneNumber;
   static String? userName;
+  static String? userEmail;
+  static String? userCity;
 }
 
 class _HomeScreenState extends State<HomeScreen> {
@@ -47,6 +50,9 @@ class _HomeScreenState extends State<HomeScreen> {
     setState(() {
       HomeScreen.userPhoneNumber = prefs.getString('userPhoneNumber');
       HomeScreen.userName = prefs.getString('userName');
+      HomeScreen.userEmail = prefs.getString('userEmail');
+      HomeScreen.userCity = prefs.getString('userCity');
+
       // print(
       //     "getUseDetails : userPHone_: $userPhoneNumber , userName_=$userName");
     });
@@ -407,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
         actions: [
           IconButton(
               onPressed: () {
-                const ProfileScreen();
+                Get.to(ProfileScreen());
               },
               icon: const Icon(FontAwesomeIcons.user))
         ],
