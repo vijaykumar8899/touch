@@ -25,6 +25,13 @@ class LoginScreenState extends State<LoginScreen> {
   String _verificationId = '';
   bool isLoading = false;
   bool otpSent = false;
+  var color1 = Color.fromARGB(255, 248, 187, 208);
+  var color2 = Colors.white.withOpacity(0.5);
+
+  void colorChange() {
+    color2 = Color.fromARGB(255, 248, 187, 208);
+    color1 = Colors.white.withOpacity(0.5);
+  }
 
   Future<void> checkUserExistOrNot(String _userPhoneNumber) async {
     print('phoneNumber inside existing user check $_userPhoneNumber');
@@ -227,7 +234,12 @@ class LoginScreenState extends State<LoginScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+                colors: [
+                  Color.fromARGB(255, 178, 212, 240),
+                  // Color.fromARGB(255, 129, 192, 245),
+                  // Color.fromARGB(255, 2, 69, 124),
+                  Color.fromARGB(255, 248, 187, 208),
+                ],
                 stops: [0.3, 1.0],
               ),
             ),
@@ -241,12 +253,14 @@ class LoginScreenState extends State<LoginScreen> {
                   exText: "Ex: 9123456789",
                   text: 'Number',
                   name_: TextInputType.number,
+                  clr: color1,
                   controller_: _phoneNumberCtrl,
                 ),
                 InputClass(
                   exText: "Ex: 123456",
                   text: 'OTP',
                   name_: TextInputType.number,
+                  clr: color2,
                   controller_: otpController_,
                 ),
                 if (otpSent) ...[
@@ -265,7 +279,7 @@ class LoginScreenState extends State<LoginScreen> {
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.0),
+                              borderRadius: BorderRadius.circular(16.0),
                             ),
                           ),
                         ),
@@ -303,7 +317,7 @@ class LoginScreenState extends State<LoginScreen> {
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.0),
+                              borderRadius: BorderRadius.circular(16.0),
                             ),
                           ),
                         ),
@@ -312,6 +326,7 @@ class LoginScreenState extends State<LoginScreen> {
                         onPressed: () {
                           setState(() {
                             isLoading = true; // Set loading to true
+                            colorChange();
                           });
                           loginWithPhone();
                           setState(() {
@@ -340,12 +355,14 @@ class InputClass extends StatelessWidget {
   String text;
   TextInputType name_;
   String exText;
+  var clr;
   TextEditingController controller_;
 
   InputClass(
       {required this.text,
       required this.name_,
       required this.exText,
+      required this.clr,
       required this.controller_});
 
   @override
@@ -368,7 +385,7 @@ class InputClass extends StatelessWidget {
               fontStyle: FontStyle.italic,
             ),
             filled: true,
-            fillColor: Colors.white.withOpacity(0.5), // Transparent with white
+            fillColor: clr, // Transparent with white
             enabledBorder: OutlineInputBorder(
               borderSide: const BorderSide(color: Colors.white70, width: 2.0),
               borderRadius: BorderRadius.circular(20),

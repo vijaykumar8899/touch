@@ -6,6 +6,7 @@ import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:touch/HelperFunctions/Toast.dart';
+import 'package:touch/Screens/LoginScreens/LoginScreen.dart';
 import 'package:touch/Screens/TabScreens/HomeScreen.dart';
 import 'package:touch/Screens/TabScreens/TabsScreen.dart';
 
@@ -26,6 +27,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   String tempName = '';
   bool isCity = false;
   bool isfullName = false;
+  var color2 = Colors.white.withOpacity(0.5);
 
   Future<void> saveUserDataToFirestoreAndSharedPreferences() async {
     try {
@@ -91,7 +93,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+                colors: [
+                  Color.fromARGB(255, 178, 212, 240),
+                  // Color.fromARGB(255, 129, 192, 245),
+                  // Color.fromARGB(255, 2, 69, 124),
+                  Color.fromARGB(255, 248, 187, 208),
+                ],
                 stops: [0.3, 1.0], // Adjust the stops as needed
               ),
             ),
@@ -105,18 +112,21 @@ class _RegisterScreenState extends State<RegisterScreen> {
                     exText: "Ex: Testing Center",
                     text: 'Name',
                     name_: TextInputType.name,
+                    clr: color2,
                     controller_: _userNameCtrl,
                   ),
                   InputClass(
                     exText: "Ex: email8899@gmail.com",
                     text: 'Email',
                     name_: TextInputType.emailAddress,
+                    clr: color2,
                     controller_: _userEmailCtrl,
                   ),
                   InputClass(
                     exText: "Ex: Jaggayyapeta",
                     text: 'City',
                     name_: TextInputType.name,
+                    clr: color2,
                     controller_: _userCityCtrl,
                   ),
                   Center(
@@ -134,7 +144,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           shape:
                               MaterialStateProperty.all<RoundedRectangleBorder>(
                             RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(4.0),
+                              borderRadius: BorderRadius.circular(16.0),
                             ),
                           ),
                         ),
@@ -182,69 +192,6 @@ class _RegisterScreenState extends State<RegisterScreen> {
           Visibility(visible: isLoading, child: LoadingClass()),
         ],
       ),
-    );
-  }
-}
-
-class InputClass extends StatelessWidget {
-  String text;
-  TextInputType name_;
-  String exText;
-  TextEditingController controller_;
-
-  InputClass(
-      {required this.text,
-      required this.name_,
-      required this.exText,
-      required this.controller_});
-
-  @override
-  Widget build(BuildContext context) {
-    // controller_.addListener(() {
-    //   if (onTextChanges != null) {
-    //     onTextChanges(controller_.text);
-    //   }
-    // });
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        TextField(
-          decoration: InputDecoration(
-            hintText: text,
-            contentPadding:
-                const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
-            hintStyle: const TextStyle(
-              color: Colors.black87,
-              fontStyle: FontStyle.italic,
-            ),
-            filled: true,
-            fillColor: Colors.white.withOpacity(0.5), // Transparent with white
-            enabledBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.white70, width: 2.0),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderSide: const BorderSide(color: Colors.white70, width: 2.0),
-              borderRadius: BorderRadius.circular(20),
-            ),
-          ),
-          keyboardType: name_,
-          controller: controller_,
-        ),
-        const SizedBox(
-          height: 5,
-        ),
-        Padding(
-          padding: EdgeInsets.only(left: 10.0),
-          child: Text(
-            exText,
-            style: TextStyle(color: Colors.black87, fontSize: 16),
-          ),
-        ),
-        const SizedBox(
-          height: 10,
-        ),
-      ],
     );
   }
 }

@@ -370,6 +370,10 @@ class _HomeScreenState extends State<HomeScreen> {
                   saveData();
                   setState(() {
                     isLoading = true;
+                    weightConrl_.clear();
+                    perConrl_.clear();
+                    lessConrl_.clear();
+                    customerNameConrl_.clear();
                   });
                   Navigator.pop(context);
                 },
@@ -426,7 +430,12 @@ class _HomeScreenState extends State<HomeScreen> {
               gradient: LinearGradient(
                 begin: Alignment.topCenter,
                 end: Alignment.bottomCenter,
-                colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
+                colors: [
+                  Color.fromARGB(255, 178, 212, 240),
+                  // Color.fromARGB(255, 129, 192, 245),
+                  // Color.fromARGB(255, 2, 69, 124),
+                  Color.fromARGB(255, 248, 187, 208),
+                ],
                 stops: [0.3, 1.0], // Adjust the stops as needed
               ),
             ),
@@ -467,89 +476,27 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
 
                 SpaceBoxHeight(size: 10),
-
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Percentage",
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 20),
-                    hintStyle: const TextStyle(
-                      color: Colors.black87,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    filled: true,
-                    fillColor: const Color.fromARGB(
-                        100, 178, 212, 240), // Light blue color
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white70, width: 2.0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white70, width: 2.0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                  controller: perConrl_,
+                TextFieldDisplayClass(
+                  displayHint: "Percentage",
+                  clr: Color.fromARGB(100, 178, 212, 240),
+                  contrl: perConrl_,
                 ),
-
                 SpaceBoxHeight(size: 10),
 
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Less",
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 20),
-                    hintStyle: const TextStyle(
-                      color: Colors.black87,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    filled: true,
-                    fillColor: Colors.pink[100], // Pink color
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white70, width: 2.0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white70, width: 2.0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                  ),
-                  keyboardType: TextInputType.number,
-                  controller: lessConrl_,
+                TextFieldDisplayClass(
+                  displayHint: "Less",
+                  clr: Colors.pink[100],
+                  contrl: lessConrl_,
                 ),
+
                 SpaceBoxHeight(size: 10),
                 //end
-                TextField(
-                  decoration: InputDecoration(
-                    hintText: "Name of the Customer",
-                    contentPadding: const EdgeInsets.symmetric(
-                        vertical: 20, horizontal: 20),
-                    hintStyle: const TextStyle(
-                      color: Colors.black87,
-                      fontStyle: FontStyle.italic,
-                    ),
-                    filled: true,
-                    fillColor:
-                        Colors.white.withOpacity(0.5), // Transparent with white
-                    enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white70, width: 2.0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white70, width: 2.0),
-                      borderRadius: BorderRadius.circular(40),
-                    ),
-                  ),
-                  keyboardType: TextInputType.name,
-                  controller: customerNameConrl_,
+                TextFieldDisplayClass(
+                  displayHint: "Name of the Customer",
+                  clr: Colors.white.withOpacity(0.5),
+                  contrl: customerNameConrl_,
                 ),
+
                 const SizedBox(height: 30),
                 //start
 
@@ -597,11 +544,6 @@ class _HomeScreenState extends State<HomeScreen> {
                           // );
 
                           showOutputtDialog(context);
-
-                          weightConrl_.clear();
-                          perConrl_.clear();
-                          lessConrl_.clear();
-                          customerNameConrl_.clear();
                         });
                       },
                       child: const Text('Calculate'),
@@ -821,6 +763,46 @@ class LoadingClass extends StatelessWidget {
     return SpinKitCircle(
       size: 75,
       color: Color.fromARGB(255, 5, 97, 171),
+    );
+  }
+}
+
+class TextFieldDisplayClass extends StatelessWidget {
+  String displayHint;
+  var clr;
+  TextEditingController contrl;
+
+  TextFieldDisplayClass(
+      {super.key,
+      required this.displayHint,
+      required this.clr,
+      required this.contrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      decoration: InputDecoration(
+        hintText: displayHint,
+        contentPadding:
+            const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
+        hintStyle: const TextStyle(
+          color: Colors.black87,
+          fontStyle: FontStyle.italic,
+        ),
+        filled: true,
+        fillColor: clr, // Transparent with white
+        enabledBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white70, width: 2.0),
+          borderRadius: BorderRadius.circular(40),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: const BorderSide(color: Colors.white70, width: 2.0),
+          borderRadius: BorderRadius.circular(40),
+        ),
+      ),
+      keyboardType: TextInputType.number,
+      controller: contrl,
+      onChanged: (_) {},
     );
   }
 }
