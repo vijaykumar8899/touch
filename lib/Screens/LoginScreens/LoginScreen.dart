@@ -206,7 +206,7 @@ class LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         title: Text(
           "Login or Signup Page",
-          style: GoogleFonts.italiana(
+          style: GoogleFonts.oswald(
             // Use your desired Google Font, e.g., 'lobster'
             textStyle: const TextStyle(
               color: Colors.black,
@@ -222,27 +222,27 @@ class LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           Container(
-            // decoration: const BoxDecoration(
-            //   color: Color.fromARGB(
-            //     255,
-            //     178,
-            //     212,
-            //     240,
-            //   ),
-            // ),
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromARGB(255, 178, 212, 240),
-                  // Color.fromARGB(255, 129, 192, 245),
-                  // Color.fromARGB(255, 2, 69, 124),
-                  Color.fromARGB(255, 248, 187, 208),
-                ],
-                stops: [0.3, 1.0],
+              color: Color.fromARGB(
+                255,
+                178,
+                212,
+                240,
               ),
             ),
+            // decoration: const BoxDecoration(
+            //   gradient: LinearGradient(
+            //     begin: Alignment.topCenter,
+            //     end: Alignment.bottomCenter,
+            //     colors: [
+            //       Color.fromARGB(255, 178, 212, 240),
+            //       // Color.fromARGB(255, 129, 192, 245),
+            //       // Color.fromARGB(255, 2, 69, 124),
+            //       Color.fromARGB(255, 248, 187, 208),
+            //     ],
+            //     stops: [0.3, 1.0],
+            //   ),
+            // ),
             alignment: Alignment.center,
             padding: const EdgeInsets.all(32),
             child: Column(
@@ -256,13 +256,15 @@ class LoginScreenState extends State<LoginScreen> {
                   clr: color1,
                   controller_: _phoneNumberCtrl,
                 ),
-                InputClass(
-                  exText: "Ex: 123456",
-                  text: 'OTP',
-                  name_: TextInputType.number,
-                  clr: color2,
-                  controller_: otpController_,
-                ),
+                if (otpSent) ...[
+                  InputClass(
+                    exText: "Ex: 123456",
+                    text: 'OTP',
+                    name_: TextInputType.number,
+                    clr: color2,
+                    controller_: otpController_,
+                  ),
+                ],
                 if (otpSent) ...[
                   Center(
                     child: TextButtonTheme(

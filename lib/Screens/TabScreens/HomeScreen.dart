@@ -44,6 +44,7 @@ class _HomeScreenState extends State<HomeScreen> {
   int totalCount = 0;
   double perResult = 0.0;
   String custmerName = '';
+  var time;
 
   getUserDetailsFromSharedPref() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
@@ -66,7 +67,7 @@ class _HomeScreenState extends State<HomeScreen> {
     List<String> parts = currentDate.split('-');
     formattedDate =
         '${parts[2]}-${parts[1]}-${parts[0]}'; // Reversing the date format to 'dd-mm-yyyy'
-
+    // formattedDate = '06-01-2024';
     // ToastMessage.toast_(
     //     formattedDate); // This will output the date in 'dd-mm-yyyy' format
   }
@@ -107,18 +108,20 @@ class _HomeScreenState extends State<HomeScreen> {
 
         // return [totalWeight.toString(), totalCount.toString()];
       } else {
-        await firestore
-            .collection(mainFolder)
-            .doc('vijay')
-            .collection('allRecordCalculation')
-            .doc(formattedDate)
-            .set({
-          'totalWeight': '0.0',
-          'totalCount': '0',
-          'timeStamp': Timestamp.now(),
-        }); //.then((value) => ToastMessage.toast_('set was successfull'));
-
-        // return ['0.0', '0'];
+        try {
+          await firestore
+              .collection(mainFolder)
+              .doc(HomeScreen.userPhoneNumber)
+              .collection('allRecordCalculation')
+              .doc(formattedDate)
+              .set({
+            'totalWeight': '0.0',
+            'totalCount': '0',
+            'timeStamp': Timestamp.now(),
+          });
+        } catch (e) {
+          print("error in set : $e");
+        }
       }
     } catch (e) {
       print('Error in the first method : $e');
@@ -180,6 +183,7 @@ class _HomeScreenState extends State<HomeScreen> {
           .set({
         'totalWeight': totalWeight.toStringAsFixed(3),
         'totalCount': totalCount.toString(),
+        'timeStamp': Timestamp.now(),
       }); //.then((value) => ToastMessage.toast_('set was successfull'));
 
       setState(() {
@@ -190,6 +194,12 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       ToastMessage.toast_('error : ${e.toString()}');
+      setState(() {
+        totalWeight = 0.0;
+        isImageUploaded = false;
+        imagePath = '';
+        isLoading = false;
+      });
     }
   }
 
@@ -393,6 +403,7 @@ class _HomeScreenState extends State<HomeScreen> {
     //   print(
     //       "initstate : userPHone: ${HomeScreen.userPhoneNumber} , userName=${HomeScreen.userName}");
     // });
+    time = FieldValue.serverTimestamp();
   }
 
   @override
@@ -402,7 +413,7 @@ class _HomeScreenState extends State<HomeScreen> {
       appBar: AppBar(
         title: Text(
           HomeScreen.userName ?? '',
-          style: GoogleFonts.italiana(
+          style: GoogleFonts.oswald(
             // Use your desired Google Font, e.g., 'lobster'
             textStyle: const TextStyle(
               color: Colors.black,
@@ -427,16 +438,22 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           Container(
             decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromARGB(255, 178, 212, 240),
-                  // Color.fromARGB(255, 129, 192, 245),
-                  // Color.fromARGB(255, 2, 69, 124),
-                  Color.fromARGB(255, 248, 187, 208),
-                ],
-                stops: [0.3, 1.0], // Adjust the stops as needed
+              // gradient: LinearGradient(
+              //   begin: Alignment.topCenter,
+              //   end: Alignment.bottomCenter,
+              //   colors: [
+              //     Color.fromARGB(255, 178, 212, 240),
+              //     // Color.fromARGB(255, 129, 192, 245),
+              //     // Color.fromARGB(255, 2, 69, 124),
+              //     Color.fromARGB(255, 248, 187, 208),
+              //   ],
+              //   stops: [0.3, 1.0], // Adjust the stops as needed
+              // ),
+              color: const Color.fromARGB(
+                255,
+                178,
+                212,
+                240,
               ),
             ),
             alignment: Alignment.center,
@@ -452,7 +469,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         vertical: 20, horizontal: 20),
                     hintStyle: const TextStyle(
                       color: Colors.black87,
-                      fontStyle: FontStyle.italic,
+                      fontStyle: FontStyle.normal,
                     ),
                     filled: true,
                     fillColor:
@@ -480,6 +497,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   displayHint: "Percentage",
                   clr: Color.fromARGB(100, 178, 212, 240),
                   contrl: perConrl_,
+                  keyboardType: TextInputType.number,
                 ),
                 SpaceBoxHeight(size: 10),
 
@@ -487,6 +505,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   displayHint: "Less",
                   clr: Colors.pink[100],
                   contrl: lessConrl_,
+                  keyboardType: TextInputType.number,
                 ),
 
                 SpaceBoxHeight(size: 10),
@@ -495,6 +514,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   displayHint: "Name of the Customer",
                   clr: Colors.white.withOpacity(0.5),
                   contrl: customerNameConrl_,
+                  keyboardType: TextInputType.name,
                 ),
 
                 const SizedBox(height: 30),
@@ -526,12 +546,16 @@ class _HomeScreenState extends State<HomeScreen> {
                           // weight = double.tryParse(weightConrl_.text) ?? 0.00;
                           percentage = double.tryParse(perConrl_.text) ?? 0.00;
                           less = double.tryParse(lessConrl_.text) ?? 0.00;
+
                           custmerName = customerNameConrl_.text;
                           if (less > 1) {
                             less = less / 100;
                           }
                           perResult = percentage - (less);
                           result = weight * (perResult) / 100;
+                          result = (result * 1000).toInt() / 1000;   
+                          // print(
+                          //     "weight = $weight , per: $percentage , less: $less , result:$result");
                           // Navigator.push(
                           //   context,
                           //   MaterialPageRoute(
@@ -558,107 +582,6 @@ class _HomeScreenState extends State<HomeScreen> {
 
                 //pasinting
                 const SizedBox(height: 10),
-
-                // //card start
-                // Container(
-                //   height: 270,
-                //   width: 500,
-                //   child: Card(
-                //     elevation: 4.0,
-                //     shape: RoundedRectangleBorder(
-                //       borderRadius: BorderRadius.circular(10.0),
-                //       side: const BorderSide(width: 2.0, color: Colors.white),
-                //     ),
-                //     child: Padding(
-                //       padding: const EdgeInsets.all(8.0),
-                //       child: Column(
-                //         crossAxisAlignment: CrossAxisAlignment.start,
-                //         children: [
-                //           Row(
-                //             children: [
-                //               TextBoxBold(
-                //                 text: 'Date   :',
-                //               ),
-                //               SpaceBox(
-                //                 size: 10,
-                //               ),
-                //               TextBoxNormal(
-                //                 text: formattedDate,
-                //               ),
-                //               SpaceBox(
-                //                 size: 10,
-                //               ),
-                //               TextBoxNormal(
-                //                   text:
-                //                       "${DateFormat('h:mm a').format(DateTime.now())}."),
-                //             ],
-                //           ),
-                //           Row(
-                //             // mainAxisAlignment: MainAxisAlignment.center,
-                //             // crossAxisAlignment: CrossAxisAlignment.center,
-                //             children: [
-                //               TextBoxBold(text: 'Name  :  '),
-                //               TextBoxNormal(text: "Name"),
-                //             ],
-                //           ),
-                //           Row(
-                //             // mainAxisAlignment: MainAxisAlignment.center,
-                //             // crossAxisAlignment: CrossAxisAlignment.center,
-                //             children: [
-                //               TextBoxBold(text: "Sno    : "),
-                //               TextBoxNormal(text: "Sno"),
-                //             ],
-                //           ),
-                //           SpaceBoxHeight(size: 10),
-                //           Row(
-                //             children: [
-                //               ColumnBox(
-                //                 weight: weight,
-                //                 text: "Kacha.Wt",
-                //                 num: 3,
-                //               ),
-                //               SpaceBox(size: 07),
-                //               ColumnBox(
-                //                 weight: percentage,
-                //                 text: "Touch%",
-                //                 num: 2,
-                //               ),
-                //               SpaceBox(size: 01),
-                //               ColumnBox(
-                //                 weight: less,
-                //                 text: "Less.",
-                //                 num: 2,
-                //               ),
-                //               SpaceBox(size: 01),
-                //               ColumnBox(
-                //                 weight: result,
-                //                 text: "Fine.Wt",
-                //                 num: 3,
-                //               ),
-                //               SpaceBox(size: 01),
-                //             ],
-                //           ),
-                //           SpaceBoxHeight(size: 20),
-                //           Row(
-                //             children: [
-                //               TextBoxBold(text: "KACHA Wt :"),
-                //               SpaceBox(size: 20),
-                //               TextBoxNormal(text: weight.toStringAsFixed(3)),
-                //             ],
-                //           ),
-                //           Row(
-                //             children: [
-                //               TextBoxBold(text: "Fine Wt :  "),
-                //               SpaceBox(size: 20),
-                //               TextBoxNormal(text: result.toStringAsFixed(3)),
-                //             ],
-                //           ),
-                //         ],
-                //       ),
-                //     ),
-                //   ),
-                // ),
-                // //card end
               ],
             ),
           ),
@@ -721,7 +644,7 @@ class TextBoxNormal extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Text(
-      text, // Use the 'text' parameter here
+      text,
       style: const TextStyle(
         fontWeight: FontWeight.normal,
         fontSize: 18.0,
@@ -771,12 +694,15 @@ class TextFieldDisplayClass extends StatelessWidget {
   String displayHint;
   var clr;
   TextEditingController contrl;
+  var keyboardType;
 
-  TextFieldDisplayClass(
-      {super.key,
-      required this.displayHint,
-      required this.clr,
-      required this.contrl});
+  TextFieldDisplayClass({
+    super.key,
+    required this.displayHint,
+    required this.clr,
+    required this.contrl,
+    required this.keyboardType,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -787,7 +713,7 @@ class TextFieldDisplayClass extends StatelessWidget {
             const EdgeInsets.symmetric(vertical: 20, horizontal: 20),
         hintStyle: const TextStyle(
           color: Colors.black87,
-          fontStyle: FontStyle.italic,
+          fontStyle: FontStyle.normal,
         ),
         filled: true,
         fillColor: clr, // Transparent with white
@@ -800,7 +726,7 @@ class TextFieldDisplayClass extends StatelessWidget {
           borderRadius: BorderRadius.circular(40),
         ),
       ),
-      keyboardType: TextInputType.number,
+      keyboardType: keyboardType,
       controller: contrl,
       onChanged: (_) {},
     );

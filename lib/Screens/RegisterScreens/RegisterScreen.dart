@@ -73,7 +73,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
       appBar: AppBar(
         title: Text(
           "Register Page",
-          style: GoogleFonts.italiana(
+          style: GoogleFonts.oswald(
             // Use your desired Google Font, e.g., 'lobster'
             textStyle: const TextStyle(
               color: Colors.black,
@@ -89,18 +89,24 @@ class _RegisterScreenState extends State<RegisterScreen> {
       body: Stack(
         children: [
           Container(
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Color.fromARGB(255, 178, 212, 240),
-                  // Color.fromARGB(255, 129, 192, 245),
-                  // Color.fromARGB(255, 2, 69, 124),
-                  Color.fromARGB(255, 248, 187, 208),
-                ],
-                stops: [0.3, 1.0], // Adjust the stops as needed
-              ),
+            // decoration: const BoxDecoration(
+            //   gradient: LinearGradient(
+            //     begin: Alignment.topCenter,
+            //     end: Alignment.bottomCenter,
+            //     colors: [
+            //       Color.fromARGB(255, 178, 212, 240),
+            //       // Color.fromARGB(255, 129, 192, 245),
+            //       // Color.fromARGB(255, 2, 69, 124),
+            //       Color.fromARGB(255, 248, 187, 208),
+            //     ],
+            //     stops: [0.3, 1.0], // Adjust the stops as needed
+            //   ),
+            // ),
+            color: const Color.fromARGB(
+              255,
+              178,
+              212,
+              240,
             ),
             alignment: Alignment.center,
             padding: const EdgeInsets.all(32),

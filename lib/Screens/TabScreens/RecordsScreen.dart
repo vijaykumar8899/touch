@@ -45,7 +45,7 @@ class _RecordsScreenState extends State<RecordsScreen> {
         .collection('touchCollection')
         .doc(HomeScreen.userPhoneNumber)
         .collection('allRecordCalculation')
-        // .orderBy('timeStamp', descending: true)
+        .orderBy('timeStamp', descending: true)
         .get();
   }
 
@@ -53,10 +53,16 @@ class _RecordsScreenState extends State<RecordsScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       extendBodyBehindAppBar: true,
+      backgroundColor: const Color.fromARGB(
+        255,
+        178,
+        212,
+        240,
+      ),
       appBar: AppBar(
         title: Text(
           "All Records",
-          style: GoogleFonts.italiana(
+          style: GoogleFonts.oswald(
             // Use your desired Google Font, e.g., 'lobster'
             textStyle: const TextStyle(
               color: Colors.black,
@@ -69,81 +75,62 @@ class _RecordsScreenState extends State<RecordsScreen> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Container(
-        // decoration: const BoxDecoration(
-        //   gradient: LinearGradient(
-        //     begin: Alignment.topCenter,
-        //     end: Alignment.bottomCenter,
-        //     colors: [Color.fromARGB(255, 178, 212, 240), Colors.white],
-        //     stops: [0.3, 1.0],
-        //   ),
-        // ),
-        // color: Colors.red,
-        decoration: const BoxDecoration(
-          color: Color.fromARGB(
-            255,
-            178,
-            212,
-            240,
-          ),
-        ),
-        child: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
-          future: fetchAllDocuments(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return Center(
-                child: CircularProgressIndicator(),
-              );
-            } else if (snapshot.hasError) {
-              return Center(
-                child: Text('Error: ${snapshot.error}'),
-              );
-            } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return Center(
-                child: Text('No documents found'),
-              );
-            } else {
-              return ListView.builder(
-                itemCount: snapshot.data!.docs.length,
-                itemBuilder: (context, index) {
-                  final document = snapshot.data!.docs[index];
-                  final documentID = document.id;
-                  final documentData = document.data() as Map<String, dynamic>;
+      body: FutureBuilder<QuerySnapshot<Map<String, dynamic>>>(
+        future: fetchAllDocuments(),
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return Center(
+              child: CircularProgressIndicator(),
+            );
+          } else if (snapshot.hasError) {
+            return Center(
+              child: Text('Error: ${snapshot.error}'),
+            );
+          } else if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+            return Center(
+              child: Text('No documents found'),
+            );
+          } else {
+            return ListView.builder(
+              itemCount: snapshot.data!.docs.length,
+              itemBuilder: (context, index) {
+                final document = snapshot.data!.docs[index];
+                final documentID = document.id;
+                final documentData = document.data() as Map<String, dynamic>;
 
-                  numberOfArrowIcons = snapshot.data!.docs.length;
-                  // print(numberOfArrowIcons);
-                  String totalWeight = documentData['totalWeight'];
-                  // print('document : $document');
+                numberOfArrowIcons = snapshot.data!.docs.length;
+                // print(numberOfArrowIcons);
+                String totalWeight = documentData['totalWeight'];
+                // print('document : $document');
 
-                  // Display the document ID and its data
-                  return Column(
-                    children: [
-                      DayDisplayContainer(
-                        date: documentID,
-                        totalWeight: totalWeight,
-                        isArrowPressed: isArrowPressedList[index],
-                        onArrowPressed: () {
-                          setState(() {
-                            isArrowPressedList[index] =
-                                !isArrowPressedList[index];
-                            _saveArrowState(index);
-                          });
-                        },
-                      ),
-                      if (isArrowPressedList[index])
-                        SizedBox(
-                          height: 550,
-                          width: 340,
-                          child: DisplayDataFromFirebase(
-                              collectionPath: documentID),
-                        ), // Show when arrow is pressed
-                    ],
-                  );
-                },
-              );
-            }
-          },
-        ),
+                // Display the document ID and its data
+                return Column(
+                  children: [
+                    DayDisplayContainer(
+                      date: documentID,
+                      totalWeight: totalWeight,
+                      isArrowPressed: isArrowPressedList[index],
+                      onArrowPressed: () {
+                        setState(() {
+                          isArrowPressedList[index] =
+                              !isArrowPressedList[index];
+                          _saveArrowState(index);
+                        });
+                      },
+                    ),
+                    if (isArrowPressedList[index])
+                      SizedBox(
+                        height: 550,
+                        width: 340,
+                        child:
+                            DisplayDataFromFirebase(collectionPath: documentID),
+                      ), // Show when arrow is pressed
+                  ],
+                );
+              },
+            );
+          }
+        },
       ),
     );
   }
@@ -211,7 +198,7 @@ class _DayDisplayContainerState extends State<DayDisplayContainer> {
                       : Icons.arrow_downward_sharp,
                   size: 30,
                   color: widget.isArrowPressed
-                      ? Colors.grey
+                      ? Colors.black
                       : const Color.fromARGB(255, 2, 69, 124),
                   //arrow color here
                 ),
@@ -375,7 +362,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
                                   text: 'Date   :',
                                 ),
                                 SpaceBox(
-                                  size: 10,
+                                  size: 5,
                                 ),
                                 TextBoxNormal(
                                   text: formattedDateTime,
@@ -386,7 +373,7 @@ class DisplayDataFromFirebase extends StatelessWidget {
                               // mainAxisAlignment: MainAxisAlignment.center,
                               // crossAxisAlignment: CrossAxisAlignment.center,
                               children: [
-                                TextBoxBold(text: 'Name  :  '),
+                                TextBoxBold(text: 'Name :  '),
                                 TextBoxNormal(text: doc['name']),
                               ],
                             ),
